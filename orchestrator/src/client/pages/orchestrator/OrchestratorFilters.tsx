@@ -50,6 +50,8 @@ interface OrchestratorFiltersProps {
   sort: JobSort;
   onSortChange: (sort: JobSort) => void;
   onResetFilters: () => void;
+  titleKeyword: string;
+  onTitleKeywordChange: (value: string) => void;
   filteredCount: number;
   isFiltersOpen?: boolean;
   onFiltersOpenChange?: (open: boolean) => void;
@@ -127,6 +129,8 @@ export const OrchestratorFilters: React.FC<OrchestratorFiltersProps> = ({
   sort,
   onSortChange,
   onResetFilters,
+  titleKeyword,
+  onTitleKeywordChange,
   filteredCount,
   isFiltersOpen: isFiltersOpenProp,
   onFiltersOpenChange: onFiltersOpenChangeProp,
@@ -146,8 +150,9 @@ export const OrchestratorFilters: React.FC<OrchestratorFiltersProps> = ({
       Number(
         (typeof salaryFilter.min === "number" && salaryFilter.min > 0) ||
           (typeof salaryFilter.max === "number" && salaryFilter.max > 0),
-      ),
-    [sourceFilter, sponsorFilter, salaryFilter.min, salaryFilter.max],
+      ) +
+      Number(titleKeyword.trim().length > 0),
+    [sourceFilter, sponsorFilter, salaryFilter.min, salaryFilter.max, titleKeyword],
   );
   const showSalaryMin =
     salaryFilter.mode === "at_least" || salaryFilter.mode === "between";
@@ -231,6 +236,19 @@ export const OrchestratorFilters: React.FC<OrchestratorFiltersProps> = ({
                 <Separator className="my-4" />
 
                 <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle>Title / Company</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Input
+                        placeholder='e.g. "intern", "ML engineer"'
+                        value={titleKeyword}
+                        onChange={(e) => onTitleKeywordChange(e.target.value)}
+                      />
+                    </CardContent>
+                  </Card>
+
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle>Sources</CardTitle>

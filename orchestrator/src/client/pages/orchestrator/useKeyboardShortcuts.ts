@@ -30,7 +30,7 @@ type UseKeyboardShortcutsArgs = {
   setIsHelpDialogOpen: (updater: (prev: boolean) => boolean) => void;
   clearSelection: () => void;
   toggleSelectJob: (id: string) => void;
-  runJobAction: (action: JobAction) => Promise<void>;
+  runJobAction: (action: JobAction, explicitIds?: string[]) => Promise<void>;
   loadJobs: () => Promise<void>;
 };
 

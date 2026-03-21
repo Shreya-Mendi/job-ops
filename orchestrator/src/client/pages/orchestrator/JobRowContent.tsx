@@ -21,6 +21,7 @@ interface JobRowContentProps {
   job: JobListItem;
   isSelected?: boolean;
   showStatusDot?: boolean;
+  showSourceBadge?: boolean;
   statusDotClassName?: string;
   className?: string;
 }

@@ -22,9 +22,19 @@ export const useFilteredJobs = (
   sponsorFilter: SponsorFilter,
   salaryFilter: SalaryFilter,
   sort: JobSort,
+  titleKeyword?: string,
 ) =>
   useMemo(() => {
     let filtered = jobs.filter((job) => job.status !== "in_progress");
+
+    if (titleKeyword && titleKeyword.trim().length > 0) {
+      const kw = titleKeyword.trim().toLowerCase();
+      filtered = filtered.filter(
+        (job) =>
+          job.title.toLowerCase().includes(kw) ||
+          job.employer.toLowerCase().includes(kw),
+      );
+    }
 
     if (activeTab === "ready") {
       filtered = filtered.filter((job) => job.status === "ready");
@@ -89,4 +99,4 @@ export const useFilteredJobs = (
     }
 
     return [...filtered].sort((a, b) => compareJobs(a, b, sort));
-  }, [jobs, activeTab, sourceFilter, sponsorFilter, salaryFilter, sort]);
+  }, [jobs, activeTab, sourceFilter, sponsorFilter, salaryFilter, sort, titleKeyword]);

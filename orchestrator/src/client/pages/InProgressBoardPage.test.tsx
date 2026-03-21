@@ -47,6 +47,8 @@ const makeJob = (overrides: Partial<JobListItem>): JobListItem => ({
   discoveredAt: "2026-01-01T00:00:00.000Z",
   appliedAt: null,
   updatedAt: "2026-01-01T00:00:00.000Z",
+  pdfPath: null,
+  coverLetterPath: null,
   ...overrides,
 });
 

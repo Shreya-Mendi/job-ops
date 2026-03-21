@@ -159,6 +159,21 @@ export const useOrchestratorFilters = () => {
     [setSearchParams],
   );
 
+  const titleKeyword = searchParams.get("title") ?? "";
+  const setTitleKeyword = useCallback(
+    (value: string) => {
+      setSearchParams(
+        (prev) => {
+          if (value.trim()) prev.set("title", value.trim());
+          else prev.delete("title");
+          return prev;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   const resetFilters = useCallback(() => {
     setSearchParams(
       (prev) => {
@@ -169,6 +184,7 @@ export const useOrchestratorFilters = () => {
         prev.delete("salaryMax");
         prev.delete("minSalary");
         prev.delete("sort");
+        prev.delete("title");
         return prev;
       },
       { replace: true },
@@ -185,6 +201,8 @@ export const useOrchestratorFilters = () => {
     setSalaryFilter,
     sort,
     setSort,
+    titleKeyword,
+    setTitleKeyword,
     resetFilters,
   };
 };
