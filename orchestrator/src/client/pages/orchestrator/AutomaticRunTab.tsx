@@ -5,9 +5,9 @@ import {
   normalizeCountryKey,
   SUPPORTED_COUNTRY_KEYS,
 } from "@shared/location-support.js";
-import type { AppSettings, JobSource } from "@shared/types";
+import type { AppSettings, JobSource, PipelinePreset } from "@shared/types";
 import { Loader2, Sparkles } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Accordion,
@@ -56,9 +56,9 @@ interface AutomaticRunTabProps {
 const DEFAULT_VALUES: AutomaticRunValues = {
   topN: 10,
   minSuitabilityScore: 50,
-  searchTerms: ["web developer"],
-  runBudget: 200,
-  country: "united kingdom",
+  searchTerms: ["machine learning engineer", "AI engineer", "software engineer machine learning"],
+  runBudget: 500,
+  country: "united states",
   cityLocations: [],
 };
 
@@ -151,6 +151,9 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
 }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [savedPresets, setSavedPresets] = useState<PipelinePreset[]>([]);
+  const [runningPresetId, setRunningPresetId] = useState<string | null>(null);
+  const presetsLoadedRef = useRef(false);
   const { watch, reset, setValue } = useForm<AutomaticRunFormValues>({
     defaultValues: {
       topN: String(DEFAULT_VALUES.topN),
@@ -223,7 +226,53 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
       searchTermDraft: "",
     });
     setAdvancedOpen(false);
+
+    // Fetch saved presets once when the dialog opens
+    if (!presetsLoadedRef.current) {
+      presetsLoadedRef.current = true;
+      fetch("/api/presets")
+        .then((r) => r.json())
+        .then((json) => {
+          if (Array.isArray(json?.data)) {
+            setSavedPresets(json.data as PipelinePreset[]);
+          }
+        })
+        .catch(() => {
+          // silently ignore
+        });
+    }
   }, [open, settings, reset]);
+
+  const loadPresetIntoForm = (preset: PipelinePreset) => {
+    setValue("country", preset.country, { shouldDirty: true });
+    setValue("cityLocations", preset.cityLocations, { shouldDirty: true });
+    setValue("searchTerms", preset.searchTerms, { shouldDirty: true });
+    setValue("topN", String(preset.topN), { shouldDirty: true });
+    setValue("minSuitabilityScore", String(preset.minSuitabilityScore), {
+      shouldDirty: true,
+    });
+    setValue("runBudget", String(preset.runBudget), { shouldDirty: true });
+  };
+
+  const handleRunPreset = async (preset: PipelinePreset) => {
+    setRunningPresetId(preset.id);
+    try {
+      const res = await fetch(`/api/presets/${preset.id}/run`, {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Failed to start");
+      const { toast } = await import("sonner");
+      toast.success(`Pipeline started with preset "${preset.name}".`);
+    } catch (err) {
+      const { toast } = await import("sonner");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to run preset",
+      );
+    } finally {
+      setRunningPresetId(null);
+    }
+  };
 
   const values = useMemo<AutomaticRunValues>(() => {
     const normalizedCountry = normalizeUiCountryKey(countryInput);
@@ -344,6 +393,49 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
+        {savedPresets.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Saved Presets</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2 pt-0">
+              {savedPresets.map((preset) => (
+                <div key={preset.id} className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5 text-xs"
+                    onClick={() => loadPresetIntoForm(preset)}
+                    disabled={runningPresetId !== null}
+                  >
+                    {preset.name}
+                    {preset.jobType && (
+                      <span className="text-muted-foreground">
+                        · {preset.jobType}
+                      </span>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 shrink-0"
+                    title={`Run "${preset.name}" now`}
+                    disabled={isPipelineRunning || runningPresetId !== null}
+                    onClick={() => void handleRunPreset(preset)}
+                  >
+                    {runningPresetId === preset.id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardContent className="space-y-4 pt-6">
             <div className="grid items-center gap-3 md:grid-cols-[120px_1fr]">

@@ -1,5 +1,20 @@
 import type { JobListItem } from "@shared/types.js";
 import { cn } from "@/lib/utils";
+
+function formatPostedDate(datePosted: string | null | undefined): string | null {
+  if (!datePosted) return null;
+  const ts = Number(datePosted);
+  const d = isNaN(ts) ? new Date(datePosted) : new Date(ts);
+  if (isNaN(d.getTime())) return null;
+  const now = Date.now();
+  const diffMs = now - d.getTime();
+  const diffDays = Math.floor(diffMs / 86_400_000);
+  if (diffDays === 0) return "today";
+  if (diffDays === 1) return "1d ago";
+  if (diffDays < 30) return `${diffDays}d ago`;
+  if (diffDays < 60) return "1mo ago";
+  return `${Math.floor(diffDays / 30)}mo ago`;
+}
 import { defaultStatusToken, statusTokens } from "./constants";
 
 interface JobRowContentProps {
@@ -53,6 +68,11 @@ export const JobRowContent = ({
           {job.employer}
           {job.location && (
             <span className="before:content-['_in_']">{job.location}</span>
+          )}
+          {formatPostedDate(job.datePosted) && (
+            <span className="before:content-['_·_'] text-muted-foreground/50">
+              {formatPostedDate(job.datePosted)}
+            </span>
           )}
         </div>
         {job.salary?.trim() && (

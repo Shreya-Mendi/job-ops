@@ -1,5 +1,6 @@
 import { logger } from "@infra/logger";
 import type { ResumeProfile } from "@shared/types";
+import { getMasterResumeProfile, hasMasterResume } from "./master-resume";
 import { getResume, RxResumeAuthConfigError } from "./rxresume";
 import { getConfiguredRxResumeBaseResumeId } from "./rxresume/baseResumeId";
 
@@ -7,21 +8,45 @@ let cachedProfile: ResumeProfile | null = null;
 let cachedResumeId: string | null = null;
 
 /**
- * Get the base resume profile from RxResume.
+ * Get the base resume profile.
  *
- * Requires rxresumeBaseResumeId to be configured in settings.
+ * Priority:
+ * 1. Master resume text file (if uploaded via Settings)
+ * 2. Reactive Resume (legacy, if configured)
+ *
  * Results are cached until clearProfileCache() is called.
  *
- * @param forceRefresh Force reload from API.
- * @throws Error if rxresumeBaseResumeId is not configured or API call fails.
+ * @param forceRefresh Force reload from source.
+ * @throws Error if neither source is configured.
  */
 export async function getProfile(forceRefresh = false): Promise<ResumeProfile> {
+  // 1. Try master resume text first
+  if (await hasMasterResume()) {
+    if (cachedProfile && cachedResumeId === "master" && !forceRefresh) {
+      return cachedProfile;
+    }
+    try {
+      logger.info("Loading profile from master resume text");
+      const profile = await getMasterResumeProfile();
+      if (profile) {
+        cachedProfile = profile;
+        cachedResumeId = "master";
+        return cachedProfile;
+      }
+    } catch (error) {
+      logger.warn("Failed to load master resume profile, trying RxResume", {
+        error,
+      });
+    }
+  }
+
+  // 2. Fall back to Reactive Resume
   const { resumeId: rxresumeBaseResumeId } =
     await getConfiguredRxResumeBaseResumeId();
 
   if (!rxresumeBaseResumeId) {
     throw new Error(
-      "Base resume not configured. Please select a base resume from your RxResume account in Settings.",
+      "No resume configured. Please upload your master resume in Settings, or select a base resume from your RxResume account.",
     );
   }
 

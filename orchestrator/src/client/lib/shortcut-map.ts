@@ -94,8 +94,8 @@ export const SHORTCUTS = {
     scope: ["discovered", "ready"],
   },
   moveToReady: {
-    key: "r",
-    displayKey: "r",
+    key: "Shift+R",
+    displayKey: "Shift+R",
     label: "Move to Ready",
     group: "actions",
     scope: ["discovered"],

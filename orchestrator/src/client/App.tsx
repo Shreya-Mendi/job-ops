@@ -115,6 +115,11 @@ export const App: React.FC = () => {
                   path="/jobs/:tab/:jobId"
                   element={<OrchestratorPage />}
                 />
+                {/* Catch-all: redirect unknown routes to main jobs view */}
+                <Route
+                  path="*"
+                  element={<Navigate to="/jobs/ready" replace />}
+                />
               </Routes>
             </div>
           </CSSTransition>

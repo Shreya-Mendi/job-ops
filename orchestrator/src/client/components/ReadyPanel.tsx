@@ -118,6 +118,10 @@ export const ReadyPanel: React.FC<ReadyPanelProps> = ({
     ? `/pdfs/resume_${job.id}.pdf?v=${encodeURIComponent(job.updatedAt)}`
     : "#";
 
+  const coverLetterHref = job
+    ? `/pdfs/cover_letter_${job.id}.pdf?v=${encodeURIComponent(job.updatedAt)}`
+    : "#";
+
   const jobLink = job ? job.applicationLink || job.jobUrl : "#";
 
   const selectedProjectIds = useMemo(() => {
@@ -396,24 +400,41 @@ export const ReadyPanel: React.FC<ReadyPanelProps> = ({
             </a>
           </Button>
 
-          {/* Open job - to verify before applying */}
+          {/* Download Cover Letter - only shown when available */}
+          {job.coverLetterPath && (
+            <Button
+              asChild
+              variant="outline"
+              className="h-9 w-full gap-1 px-2 text-xs"
+            >
+              <a
+                href={coverLetterHref}
+                download={`${safeFilenamePart(personName || "Unknown")}_${safeFilenamePart(job.employer || "Unknown")}_CoverLetter.pdf`}
+              >
+                <Download className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Download Cover Letter</span>
+              </a>
+            </Button>
+          )}
+
+          {/* Primary apply CTA — opens application in new tab */}
           <Button
             asChild
-            variant="outline"
-            className="h-9 w-full gap-1 px-2 text-xs"
+            variant="default"
+            className="h-9 w-full gap-1 px-2 text-xs sm:col-span-2 bg-orange-500 hover:bg-orange-600 text-white border-0"
           >
             <a href={jobLink} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">Open Job Listing</span>
-              <KbdHint shortcut="o" className="ml-auto" />
+              <span className="truncate font-semibold">Open Application →</span>
+              <KbdHint shortcut="o" className="ml-auto opacity-70" />
             </a>
           </Button>
 
-          {/* Primary CTA: Mark Applied */}
+          {/* Confirm step: Mark Applied — click after submitting */}
           <Button
             onClick={handleMarkApplied}
-            variant="default"
-            className="h-9 w-full gap-1 px-2 text-xs"
+            variant="outline"
+            className="h-9 w-full gap-1 px-2 text-xs sm:col-span-2 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10 hover:text-emerald-300"
             disabled={isMarkingApplied}
           >
             {isMarkingApplied ? (
@@ -421,8 +442,8 @@ export const ReadyPanel: React.FC<ReadyPanelProps> = ({
             ) : (
               <CheckCircle2 className="h-3.5 w-3.5" />
             )}
-            <span className="truncate">Mark Applied</span>
-            <KbdHint shortcut="a" className="ml-auto" />
+            <span className="truncate">Mark Applied (after submitting)</span>
+            <KbdHint shortcut="a" className="ml-auto opacity-70" />
           </Button>
         </div>
       </div>

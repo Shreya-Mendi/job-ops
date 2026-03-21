@@ -153,6 +153,8 @@ export interface Job {
   tailoredSkills: string | null; // Generated resume skills (JSON)
   selectedProjectIds: string | null; // Comma-separated IDs of selected projects
   pdfPath: string | null; // Path to generated PDF
+  coverLetterPath: string | null; // Path to generated cover letter PDF
+  coverLetterText: string | null; // Cover letter plain text
   tracerLinksEnabled: boolean; // Rewrite outbound resume links to tracer links on next PDF generation
   sponsorMatchScore: number | null; // 0-100 fuzzy match score with visa sponsors
   sponsorMatchNames: string | null; // JSON array of matched sponsor names (when 100% matches or top match)
@@ -216,6 +218,8 @@ export type JobListItem = Pick<
   | "discoveredAt"
   | "appliedAt"
   | "updatedAt"
+  | "pdfPath"
+  | "coverLetterPath"
 >;
 
 export interface CreateJobInput {
@@ -309,6 +313,8 @@ export interface UpdateJobInput {
   tailoredSkills?: string;
   selectedProjectIds?: string;
   pdfPath?: string;
+  coverLetterPath?: string;
+  coverLetterText?: string;
   tracerLinksEnabled?: boolean;
   appliedAt?: string;
   sponsorMatchScore?: number;

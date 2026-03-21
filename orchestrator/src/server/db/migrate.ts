@@ -603,6 +603,27 @@ const migrations = [
        ORDER BY se.occurred_at DESC, se.id DESC
        LIMIT 1
      ), 'applied') = 'closed'`,
+
+  // Add cover letter columns for local PDF generation (safe to skip if already present)
+  `ALTER TABLE jobs ADD COLUMN cover_letter_path TEXT`,
+  `ALTER TABLE jobs ADD COLUMN cover_letter_text TEXT`,
+
+  // Pipeline presets for saved search configurations with optional scheduling
+  `CREATE TABLE IF NOT EXISTS pipeline_presets (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    search_terms TEXT NOT NULL DEFAULT '[]',
+    country TEXT NOT NULL DEFAULT 'united states',
+    city_locations TEXT NOT NULL DEFAULT '[]',
+    top_n INTEGER NOT NULL DEFAULT 10,
+    min_suitability_score INTEGER NOT NULL DEFAULT 50,
+    run_budget INTEGER NOT NULL DEFAULT 500,
+    job_type TEXT,
+    schedule_enabled INTEGER NOT NULL DEFAULT 0,
+    schedule_hours TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
 ];
 
 console.log("🔧 Running database migrations...");

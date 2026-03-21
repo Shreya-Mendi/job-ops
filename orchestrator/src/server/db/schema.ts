@@ -98,6 +98,8 @@ export const jobs = sqliteTable("jobs", {
   tailoredSkills: text("tailored_skills"),
   selectedProjectIds: text("selected_project_ids"),
   pdfPath: text("pdf_path"),
+  coverLetterPath: text("cover_letter_path"),
+  coverLetterText: text("cover_letter_text"),
   tracerLinksEnabled: integer("tracer_links_enabled", { mode: "boolean" })
     .notNull()
     .default(false),
@@ -465,7 +467,27 @@ export type PostApplicationMessageRow =
   typeof postApplicationMessages.$inferSelect;
 export type NewPostApplicationMessageRow =
   typeof postApplicationMessages.$inferInsert;
+export const pipelinePresets = sqliteTable("pipeline_presets", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  searchTerms: text("search_terms").notNull().default("[]"),
+  country: text("country").notNull().default("united states"),
+  cityLocations: text("city_locations").notNull().default("[]"),
+  topN: integer("top_n").notNull().default(10),
+  minSuitabilityScore: integer("min_suitability_score").notNull().default(50),
+  runBudget: integer("run_budget").notNull().default(500),
+  jobType: text("job_type"),
+  scheduleEnabled: integer("schedule_enabled", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  scheduleHours: text("schedule_hours").notNull().default("[]"),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
+});
+
 export type TracerLinkRow = typeof tracerLinks.$inferSelect;
 export type NewTracerLinkRow = typeof tracerLinks.$inferInsert;
 export type TracerClickEventRow = typeof tracerClickEvents.$inferSelect;
 export type NewTracerClickEventRow = typeof tracerClickEvents.$inferInsert;
+export type PipelinePresetRow = typeof pipelinePresets.$inferSelect;
+export type NewPipelinePresetRow = typeof pipelinePresets.$inferInsert;

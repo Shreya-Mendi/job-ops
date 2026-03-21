@@ -68,7 +68,7 @@ export const settingsRegistry = {
     schema: z.preprocess(
       (v) => (v === "" ? null : v),
       z
-        .enum(["openrouter", "lmstudio", "ollama", "openai", "gemini"])
+        .enum(["openrouter", "lmstudio", "ollama", "openai", "gemini", "anthropic"])
         .nullable(),
     ),
     default: (): string =>
@@ -184,8 +184,8 @@ export const settingsRegistry = {
     schema: z.array(z.string().trim().min(1).max(200)).max(100),
     default: (): string[] =>
       (typeof process !== "undefined"
-        ? process.env.JOBSPY_SEARCH_TERMS || "web developer"
-        : "web developer"
+        ? process.env.JOBSPY_SEARCH_TERMS || "machine learning engineer|AI engineer|software engineer machine learning"
+        : "machine learning engineer|AI engineer|software engineer machine learning"
       )
         .split("|")
         .map((v) => v.trim())

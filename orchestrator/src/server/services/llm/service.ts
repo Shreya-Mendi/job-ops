@@ -45,6 +45,15 @@ export class LlmService {
       toStringOrNull(process.env.LLM_API_KEY) ||
       null;
 
+    // Fallback: use ANTHROPIC_API_KEY if provider is anthropic and LLM_API_KEY not set.
+    if (
+      !apiKey &&
+      resolvedProvider === "anthropic" &&
+      toStringOrNull(process.env.ANTHROPIC_API_KEY)
+    ) {
+      apiKey = toStringOrNull(process.env.ANTHROPIC_API_KEY);
+    }
+
     // Backwards-compat migration: OPENROUTER_API_KEY -> LLM_API_KEY.
     // This prevents users from losing access when upgrading (keys are often only shown once).
     if (
@@ -299,6 +308,7 @@ function normalizeProvider(
   if (normalized === "gemini") return "gemini";
   if (normalized === "lmstudio") return "lmstudio";
   if (normalized === "ollama") return "ollama";
+  if (normalized === "anthropic") return "anthropic";
   if (normalized && normalized !== "openrouter") {
     logger.warn("Unknown LLM provider, defaulting to openrouter", {
       normalized,

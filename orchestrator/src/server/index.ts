@@ -15,6 +15,7 @@ import {
 } from "./services/backup/index";
 import { initializeDemoModeServices } from "./services/demo-mode";
 import { applyStoredEnvOverrides } from "./services/envSettings";
+import { startPresetScheduler } from "./services/preset-scheduler";
 import { initialize as initializeVisaSponsors } from "./services/visa-sponsors/index";
 
 async function startServer() {
@@ -110,6 +111,17 @@ async function startServer() {
       }
     } catch (error) {
       logger.warn("Failed to initialize backup service", {
+        error: sanitizeUnknown(error),
+      });
+    }
+
+    // Initialize preset scheduler (runs presets at their configured UTC hours)
+    try {
+      if (process.env.DEMO_MODE !== "true") {
+        await startPresetScheduler();
+      }
+    } catch (error) {
+      logger.warn("Failed to initialize preset scheduler", {
         error: sanitizeUnknown(error),
       });
     }
