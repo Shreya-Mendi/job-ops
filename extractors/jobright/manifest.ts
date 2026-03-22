@@ -19,7 +19,7 @@ async function sessionFileExists(path: string): Promise<boolean> {
 export const manifest: ExtractorManifest = {
   id: "jobright",
   displayName: "JobRight.ai",
-  providesSources: ["jobright"],
+  providesSources: ["jobright", "jobright-recommended"],
   async run(context: ExtractorRuntimeContext) {
     if (context.shouldCancel?.()) return { success: true, jobs: [] };
 

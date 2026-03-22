@@ -48,9 +48,11 @@ const renderFilters = (
     sort: { key: "score", direction: "desc" } as JobSort,
     onSortChange: vi.fn(),
     onResetFilters: vi.fn(),
+    filteredCount: 5,
+    jobTypeFilter: "all",
+    onJobTypeFilterChange: vi.fn(),
     titleKeyword: "",
     onTitleKeywordChange: vi.fn(),
-    filteredCount: 5,
     ...overrides,
   };
 

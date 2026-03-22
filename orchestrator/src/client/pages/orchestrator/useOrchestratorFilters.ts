@@ -121,6 +121,36 @@ export const useOrchestratorFilters = () => {
     [setSearchParams],
   );
 
+  const jobTypeFilter = (searchParams.get("jobType") ?? "all");
+  const setJobTypeFilter = useCallback(
+    (value: string) => {
+      setSearchParams(
+        (prev) => {
+          if (!value || value === "all") prev.delete("jobType");
+          else prev.set("jobType", value);
+          return prev;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const titleKeyword = (searchParams.get("kw") ?? "").trim();
+  const setTitleKeyword = useCallback(
+    (value: string) => {
+      setSearchParams(
+        (prev) => {
+          if (!value.trim()) prev.delete("kw");
+          else prev.set("kw", value.trim());
+          return prev;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
   const sort = useMemo((): JobSort => {
     const sortValue = searchParams.get("sort");
     if (!sortValue) return DEFAULT_SORT;
@@ -159,21 +189,6 @@ export const useOrchestratorFilters = () => {
     [setSearchParams],
   );
 
-  const titleKeyword = searchParams.get("title") ?? "";
-  const setTitleKeyword = useCallback(
-    (value: string) => {
-      setSearchParams(
-        (prev) => {
-          if (value.trim()) prev.set("title", value.trim());
-          else prev.delete("title");
-          return prev;
-        },
-        { replace: true },
-      );
-    },
-    [setSearchParams],
-  );
-
   const resetFilters = useCallback(() => {
     setSearchParams(
       (prev) => {
@@ -184,7 +199,8 @@ export const useOrchestratorFilters = () => {
         prev.delete("salaryMax");
         prev.delete("minSalary");
         prev.delete("sort");
-        prev.delete("title");
+        prev.delete("kw");
+        prev.delete("jobType");
         return prev;
       },
       { replace: true },
@@ -201,6 +217,8 @@ export const useOrchestratorFilters = () => {
     setSalaryFilter,
     sort,
     setSort,
+    jobTypeFilter,
+    setJobTypeFilter,
     titleKeyword,
     setTitleKeyword,
     resetFilters,

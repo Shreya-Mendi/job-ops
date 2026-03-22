@@ -255,6 +255,7 @@ export const DEMO_SOURCE_BASE_URLS: Record<JobSource, string> = {
   adzuna: "https://www.adzuna.com",
   hiringcafe: "https://hiring.cafe",
   jobright: "https://jobright.ai",
+  "jobright-recommended": "https://jobright.ai/jobs/recommended",
   manual: "https://example.com",
 };
 

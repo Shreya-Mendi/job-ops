@@ -66,7 +66,7 @@ function mapItem(item: RawJobrightListItem): CreateJobInput | null {
     location: raw.isRemote ? "Remote" : (raw.jobLocation?.trim() ?? ""),
     jobDescription: raw.jobSummary ?? "",
     jobUrl,
-    source: "jobright" as const,
+    source: "jobright-recommended" as const,
     salary: buildSalary(raw),
     jobType: raw.employmentType ?? raw.jobSeniority ?? undefined,
     datePosted: raw.publishTime ?? undefined,

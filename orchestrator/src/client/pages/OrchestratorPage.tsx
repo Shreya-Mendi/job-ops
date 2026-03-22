@@ -42,6 +42,8 @@ export const OrchestratorPage: React.FC = () => {
     setSalaryFilter,
     sort,
     setSort,
+    jobTypeFilter,
+    setJobTypeFilter,
     titleKeyword,
     setTitleKeyword,
     resetFilters,
@@ -154,6 +156,7 @@ export const OrchestratorPage: React.FC = () => {
     salaryFilter,
     sort,
     titleKeyword,
+    jobTypeFilter,
   );
   const counts = useMemo(() => getJobCounts(jobs), [jobs]);
   const sourcesWithJobs = useMemo(() => getSourcesWithJobs(jobs), [jobs]);
@@ -371,6 +374,8 @@ export const OrchestratorPage: React.FC = () => {
             onSortChange={setSort}
             onResetFilters={resetFilters}
             filteredCount={activeJobs.length}
+            jobTypeFilter={jobTypeFilter}
+            onJobTypeFilterChange={setJobTypeFilter}
             titleKeyword={titleKeyword}
             onTitleKeywordChange={setTitleKeyword}
           />
