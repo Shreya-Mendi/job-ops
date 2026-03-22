@@ -2,5 +2,11 @@
   "name": "@extractors/jobright",
   "version": "1.0.0",
   "type": "module",
-  "dependencies": {}
+  "scripts": {
+    "save-session": "node --import tsx/esm src/save-session.ts"
+  },
+  "dependencies": {
+    "playwright": "*",
+    "tsx": "*"
+  }
 }
