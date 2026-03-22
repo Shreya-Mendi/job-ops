@@ -619,6 +619,27 @@ const migrations = [
     min_suitability_score INTEGER NOT NULL DEFAULT 50,
     run_budget INTEGER NOT NULL DEFAULT 500,
     job_type TEXT,
+    sources TEXT NOT NULL DEFAULT '["indeed","linkedin","glassdoor","jobright"]',
+    schedule_enabled INTEGER NOT NULL DEFAULT 0,
+    schedule_hours TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+
+  // Add sources column to existing pipeline_presets tables (safe to skip if already present)
+  `ALTER TABLE pipeline_presets ADD COLUMN sources TEXT NOT NULL DEFAULT '["indeed","linkedin","glassdoor","jobright"]'`,
+
+  // (legacy) old CREATE TABLE without sources — replaced above
+  `CREATE TABLE IF NOT EXISTS pipeline_presets (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    search_terms TEXT NOT NULL DEFAULT '[]',
+    country TEXT NOT NULL DEFAULT 'united states',
+    city_locations TEXT NOT NULL DEFAULT '[]',
+    top_n INTEGER NOT NULL DEFAULT 10,
+    min_suitability_score INTEGER NOT NULL DEFAULT 50,
+    run_budget INTEGER NOT NULL DEFAULT 500,
+    job_type TEXT,
     schedule_enabled INTEGER NOT NULL DEFAULT 0,
     schedule_hours TEXT NOT NULL DEFAULT '[]',
     created_at TEXT NOT NULL DEFAULT (datetime('now')),

@@ -6,7 +6,7 @@ import {
   SUPPORTED_COUNTRY_KEYS,
 } from "@shared/location-support.js";
 import type { AppSettings, JobSource, PipelinePreset } from "@shared/types";
-import { Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles, Tag } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -80,6 +80,70 @@ const GLASSDOOR_COUNTRY_REASON =
 const GLASSDOOR_LOCATION_REASON =
   "Add at least one city in Advanced settings to enable Glassdoor.";
 const HIDDEN_COUNTRY_KEYS = new Set(["usa/ca"]);
+
+interface SearchTermPreset {
+  label: string;
+  terms: string[];
+  cityLocations?: string[];
+  country?: string;
+}
+
+const SEARCH_TERM_PRESETS: SearchTermPreset[] = [
+  {
+    label: "Internship – RTP",
+    terms: [
+      "machine learning intern",
+      "AI intern",
+      "software engineer intern",
+      "data science intern",
+    ],
+    cityLocations: ["Raleigh, NC", "Durham, NC", "Chapel Hill, NC"],
+    country: "united states",
+  },
+  {
+    label: "Internship – Remote",
+    terms: [
+      "machine learning intern remote",
+      "AI intern remote",
+      "software engineer intern remote",
+      "data science intern remote",
+    ],
+    country: "united states",
+  },
+  {
+    label: "Co-op – Nationwide",
+    terms: [
+      "machine learning co-op",
+      "AI co-op",
+      "software engineer co-op",
+      "data science co-op",
+    ],
+    country: "united states",
+  },
+  {
+    label: "NYC Finance",
+    terms: [
+      "quantitative analyst",
+      "financial engineer",
+      "data scientist finance",
+      "machine learning quant",
+      "quantitative researcher",
+    ],
+    cityLocations: ["New York, NY"],
+    country: "united states",
+  },
+  {
+    label: "AI/ML Full-time",
+    terms: [
+      "machine learning engineer",
+      "AI engineer",
+      "NLP engineer",
+      "deep learning engineer",
+      "MLOps engineer",
+    ],
+    country: "united states",
+  },
+];
 
 function normalizeUiCountryKey(value: string): string {
   const normalized = normalizeCountryKey(value);
@@ -252,6 +316,9 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
       shouldDirty: true,
     });
     setValue("runBudget", String(preset.runBudget), { shouldDirty: true });
+    if (preset.sources?.length) {
+      onSetPipelineSources(preset.sources);
+    }
   };
 
   const handleRunPreset = async (preset: PipelinePreset) => {
@@ -572,10 +639,38 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle>Search terms</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
+            {/* Quick presets */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Tag className="h-3 w-3" />
+                <span>Quick presets</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {SEARCH_TERM_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => {
+                      setValue("searchTerms", preset.terms, { shouldDirty: true });
+                      if (preset.country) {
+                        setValue("country", preset.country, { shouldDirty: true });
+                      }
+                      if (preset.cityLocations && preset.cityLocations.length > 0) {
+                        setValue("cityLocations", preset.cityLocations, { shouldDirty: true });
+                        setAdvancedOpen(true);
+                      }
+                    }}
+                    className="rounded-full border border-border/60 bg-muted/30 px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <TokenizedInput
               id="search-terms-input"
               values={searchTerms}
@@ -606,6 +701,9 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
                   source,
                   values.country,
                 );
+                // Hide sources incompatible with selected country (e.g. Gradcracker when US)
+                if (!countryAllowed) return null;
+
                 const allowed = isSourceAvailableForRun(source);
                 const selected = compatiblePipelineSources.includes(source);
                 const disabledReason = getSourceDisabledReason(

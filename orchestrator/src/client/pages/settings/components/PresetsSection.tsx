@@ -1,4 +1,10 @@
 import {
+  EXTRACTOR_SOURCE_METADATA,
+  PIPELINE_EXTRACTOR_SOURCE_IDS,
+  sourceLabel,
+} from "@shared/extractors";
+import type { ExtractorSourceId } from "@shared/extractors";
+import {
   formatCountryLabel,
   normalizeCountryKey,
   SUPPORTED_COUNTRY_KEYS,
@@ -42,6 +48,12 @@ function normalizeUiCountryKey(value: string): string {
   return normalized;
 }
 
+const DEFAULT_SOURCES: ExtractorSourceId[] = ["indeed", "linkedin", "glassdoor", "jobright"];
+
+const ORDERED_PIPELINE_SOURCES = [...PIPELINE_EXTRACTOR_SOURCE_IDS].sort(
+  (a, b) => EXTRACTOR_SOURCE_METADATA[a].order - EXTRACTOR_SOURCE_METADATA[b].order,
+);
+
 type FormState = {
   name: string;
   jobType: string;
@@ -51,6 +63,7 @@ type FormState = {
   topN: string;
   minSuitabilityScore: string;
   runBudget: string;
+  sources: ExtractorSourceId[];
   scheduleEnabled: boolean;
   scheduleHours: string; // comma-separated UTC hours e.g. "9, 21"
 };
@@ -65,6 +78,7 @@ const DEFAULT_FORM: FormState = {
   topN: "10",
   minSuitabilityScore: "50",
   runBudget: "500",
+  sources: DEFAULT_SOURCES,
   scheduleEnabled: false,
   scheduleHours: "9, 21",
 };
@@ -79,6 +93,7 @@ function presetToForm(preset: PipelinePreset): FormState {
     topN: String(preset.topN),
     minSuitabilityScore: String(preset.minSuitabilityScore),
     runBudget: String(preset.runBudget),
+    sources: preset.sources?.length ? preset.sources : DEFAULT_SOURCES,
     scheduleEnabled: preset.scheduleEnabled,
     scheduleHours: preset.scheduleHours.join(", "),
   };
@@ -113,6 +128,7 @@ function parseFormToInput(form: FormState): PipelinePresetInput {
       1,
       Math.min(1000, Number.parseInt(form.runBudget, 10) || 500),
     ),
+    sources: form.sources.length ? form.sources : DEFAULT_SOURCES,
     scheduleEnabled: form.scheduleEnabled,
     scheduleHours,
   };
@@ -196,6 +212,37 @@ function PresetForm({
           className="min-h-[80px] font-mono text-xs resize-y"
           disabled={isSaving}
         />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs">Sources</Label>
+        <div className="flex flex-wrap gap-1.5">
+          {ORDERED_PIPELINE_SOURCES.map((src) => {
+            const active = form.sources.includes(src);
+            return (
+              <button
+                key={src}
+                type="button"
+                disabled={isSaving}
+                onClick={() =>
+                  setForm((f) => ({
+                    ...f,
+                    sources: active
+                      ? f.sources.filter((s) => s !== src)
+                      : [...f.sources, src],
+                  }))
+                }
+                className={`rounded px-2 py-1 text-xs font-medium border transition-colors ${
+                  active
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-muted-foreground border-border hover:border-foreground/30"
+                }`}
+              >
+                {sourceLabel(src)}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -342,6 +389,11 @@ function PresetCard({
           {preset.searchTerms.length > 2 &&
             ` +${preset.searchTerms.length - 2} more`}
         </p>
+        {preset.sources?.length > 0 && (
+          <p className="text-muted-foreground/60 text-xs truncate">
+            {preset.sources.map(sourceLabel).join(", ")}
+          </p>
+        )}
       </div>
       <div className="flex items-center gap-1 shrink-0">
         <Button

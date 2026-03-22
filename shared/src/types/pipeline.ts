@@ -140,6 +140,7 @@ export interface PipelinePreset {
   minSuitabilityScore: number;
   runBudget: number;
   jobType: PipelinePresetJobType;
+  sources: ExtractorSourceId[];
   scheduleEnabled: boolean;
   scheduleHours: number[]; // UTC hours [0-23]
   createdAt: string;

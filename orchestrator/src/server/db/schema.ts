@@ -477,6 +477,7 @@ export const pipelinePresets = sqliteTable("pipeline_presets", {
   minSuitabilityScore: integer("min_suitability_score").notNull().default(50),
   runBudget: integer("run_budget").notNull().default(500),
   jobType: text("job_type"),
+  sources: text("sources").notNull().default('["indeed","linkedin","glassdoor","jobright"]'),
   scheduleEnabled: integer("schedule_enabled", { mode: "boolean" })
     .notNull()
     .default(false),

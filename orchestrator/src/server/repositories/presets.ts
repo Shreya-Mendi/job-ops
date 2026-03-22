@@ -5,6 +5,7 @@
 import { randomUUID } from "node:crypto";
 import { db } from "@server/db";
 import { pipelinePresets } from "@server/db/schema";
+import type { ExtractorSourceId } from "@shared/extractors";
 import type { PipelinePreset, PipelinePresetInput } from "@shared/types";
 import { eq } from "drizzle-orm";
 
@@ -19,6 +20,7 @@ function rowToPreset(row: typeof pipelinePresets.$inferSelect): PipelinePreset {
     minSuitabilityScore: row.minSuitabilityScore,
     runBudget: row.runBudget,
     jobType: (row.jobType as PipelinePreset["jobType"]) ?? null,
+    sources: JSON.parse(row.sources || '["indeed","linkedin","glassdoor","jobright"]') as ExtractorSourceId[],
     scheduleEnabled: row.scheduleEnabled,
     scheduleHours: JSON.parse(row.scheduleHours || "[]") as number[],
     createdAt: row.createdAt,
@@ -48,6 +50,7 @@ export async function createPreset(input: PipelinePresetInput): Promise<Pipeline
     minSuitabilityScore: input.minSuitabilityScore,
     runBudget: input.runBudget,
     jobType: input.jobType ?? null,
+    sources: JSON.stringify(input.sources ?? ["indeed", "linkedin", "glassdoor", "jobright"]),
     scheduleEnabled: input.scheduleEnabled,
     scheduleHours: JSON.stringify(input.scheduleHours),
   });
@@ -80,6 +83,7 @@ export async function updatePreset(
       }),
       ...(input.runBudget !== undefined && { runBudget: input.runBudget }),
       ...("jobType" in input && { jobType: input.jobType ?? null }),
+      ...(input.sources !== undefined && { sources: JSON.stringify(input.sources) }),
       ...(input.scheduleEnabled !== undefined && {
         scheduleEnabled: input.scheduleEnabled,
       }),
