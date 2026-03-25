@@ -276,63 +276,70 @@ const SELECTION_SCHEMA: JsonSchemaDefinition = {
   },
 };
 
-const SELECTION_PROMPT_TEMPLATE = `You are an expert ATS resume optimizer. Your ONLY goal is to maximize keyword match between this resume and the job description. Every important term from the JD must appear verbatim somewhere in the resume.
+const SELECTION_PROMPT_TEMPLATE = `You are an expert ATS resume optimizer. Rewrite resume bullets to maximize keyword match with the job description — without hallucinating any facts.
 
 JOB DESCRIPTION:
 {jobDescription}
 
-CANDIDATE BACKGROUND:
-- Work Experience: DevOps Engineer at Assetmantle (AWS/Hetzner, Docker, Kubernetes, CI/CD, blockchain microservices, 99%+ uptime); Software Dev Intern at HP Enterprise (Docker, Jenkins, REST APIs, Grafana/Prometheus, CI/CD)
-- Available Projects (pick 4-5):
-  * When2Speak — RL policy network for multi-agent dialogue, PyTorch, NLP, A/B testing, 10K-dialogue simulation
-  * UAV-SAR — Faster R-CNN fine-tuning on thermal imagery, PyTorch, CV pipeline, custom data loaders, safety-critical
-  * BMW Capstone — Interpretable ML for industrial decision-making, explainability, stakeholder requirements, production constraints
-  * Inflationship — SARIMAX + ML forecasting, alternative data, feature engineering, 0.67-1.69% MAPE, cross-validation
-  * AI Audit — EU AI Act compliance classifier, TF-IDF + logistic regression, FastAPI, Streamlit, GCP Cloud Run, MLflow
-  * Alba — Privacy-first Chrome extension, LLM emissions tracking, client-side computation, sustainability dashboard
-  * Wordle XAI Bot — Multimodal agent, vision + NLP, Grad-CAM explainability, real-time saliency
-  * Supreme Court — Random Forest on 13K cases, PDP/ICE/ALE explainability, 70% accuracy, 15% F1 improvement
-  * Paper Trail — RAG chatbot, NER, consequence classification, FastAPI, timeline UI, public document NLP
-  * Sourcing Happiness — Data analysis, animated visualizations, World Happiness Report (2019-2024)
+━━━ ORIGINAL BULLETS (source of truth — every number/metric must be copied character-for-character) ━━━
 
-COURSEWORK OPTIONS: Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Vision, Explainable AI, Alternative Data, AI Security
+PROJECTS:
+• When2Speak: [1] "Trained a lightweight RL policy network for multi-agent dialogue intervention using PyTorch and NLP; reduced unnecessary interventions by 25% while maintaining task success rate, validated on a 10,000-dialogue simulation suite via A/B testing." [2] "Applied role-prompting, prompt engineering, and policy gradient methods to optimize agent behavior in real-time conversational AI systems."
+• UAV-SAR: [1] "Fine-tuned Faster R-CNN on thermal SAR imagery with domain-specific augmentations (snow, smoke, sensor noise); achieved 20% recall improvement under adverse conditions with <5% clean-data accuracy loss." [2] "Built end-to-end CV pipeline in PyTorch with custom data loaders, augmentation strategies, and model evaluation metrics optimized for safety-critical deployment."
+• BMW Capstone: [1] "Scoping and prototyping an interpretable ML solution for industrial decision-making at BMW, balancing model performance with deployment constraints and stakeholder explainability requirements."
+• Inflationship: [1] "Engineered a forecasting pipeline fusing port-traffic alternative data with CPI using SARIMAX and ML; achieved 0.67–1.69% MAPE across major CPI categories, outperforming CPI-only baselines via rolling cross-validation."
+• AI Audit: [1] "Built an explainable compliance classifier (TF-IDF + logistic regression + rule-based checks) mapping system behavior to EU AI Act articles; deployed FastAPI + Streamlit UI on GCP Cloud Run with MLflow experiment tracking."
+• Alba: [1] "Shipped a privacy-first Chrome extension computing LLM energy, carbon, and water footprints client-side using emissions heuristics; included prompt optimization suggestions and a daily sustainability dashboard."
+• Wordle XAI Bot: [1] "Built a multimodal agent that plays Wordle using vision + NLP models, surfacing token-level saliency to explain decisions in real time." [2] "Integrated Grad-CAM style explainability to trace errors and visualize transparent human–AI interactions."
+• Supreme Court: [1] "Modeled ~13K Supreme Court cases with Random Forest; used PDP/ICE/ALE to explain predictive drivers of judicial outcomes." [2] "Improved F1-score by ~15% and achieved ~70% accuracy on held-out case outcome prediction."
+• Paper Trail: [1] "Built an NLP pipeline to classify legal consequences for individuals using public documents; includes RAG-based chatbot, NER, and multi-tier consequence classification with an interactive timeline UI."
+• Sourcing Happiness: [1] "Analyzed World Happiness Report data (2019–2024) to study regional/country trends; built animated and comparative visualizations."
 
-MASTER SKILLS:
+WORK EXPERIENCE:
+• DevOps Engineer: [1] "Architected and optimized AWS/Hetzner infrastructure and CI/CD pipelines (Docker, Kubernetes), reducing operational costs by 38% while improving reliability and uptime." [2] "Engineered automated rollout/rollback policies to reduce deployment risk and improve mean time to recovery (MTTR) across production environments." [3] "Managed containerized microservices for a blockchain-based platform, maintaining 99%+ availability across distributed nodes; improved security posture across cloud resources."
+• Software Development Intern: [1] "Developed and deployed Dockerized services on Linux; automated deployments with Jenkins and shell scripting." [2] "Integrated REST APIs in Python for monitoring; expanded observability coverage with Grafana/Prometheus to improve stability and reduce incident detection time." [3] "Streamlined CI/CD release processes across service teams, accelerating deployment cycles and reducing release friction."
+
+━━━ SKILLS ━━━
 - ML/AI: Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing
 - Frameworks & Tools: Python, PyTorch, TensorFlow, Scikit-learn, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash
 - Cloud & DevOps: AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana
 
-STEP 1 — Extract keywords: Read the JD and list every technical term, tool, method, and skill mentioned. Note which ones are in the master skills/background already, and which are NEW (only add new ones if factually accurate).
+━━━ COURSEWORK OPTIONS ━━━
+Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Vision, Explainable AI, Alternative Data, AI Security
 
-STEP 2 — Build the resume fields:
+━━━ REWRITING RULES — FOLLOW STRICTLY ━━━
+1. STAR structure: reframe each bullet as Action → Method/Tool → Result where the original supports it
+2. Substitute words with JD keyword equivalents where meaning is the same (e.g. "NLP" → "natural language processing" if JD uses that phrase)
+3. NEVER change, round, or omit any number, percentage, or metric — copy them exactly from the originals above (e.g. "25%", "0.67–1.69% MAPE", "38%", "99%+", "~13K", "~15%", "~70%")
+4. NEVER add a tool, technology, or claim that is not in the original bullet
+5. NEVER merge two bullets into one or split one into two — output the same count as input
+6. Each rewritten bullet must describe the same work as the original
 
-1. "selectedProjects": 4-5 project names ordered by relevance to JD.
+━━━ OUTPUT STEPS ━━━
 
-2. "bulletOverrides": For EVERY selected project, rewrite ALL bullets to inject JD keywords verbatim. Rules:
-   - Use the EXACT phrasing from the JD (e.g. JD says "large language models" → use "large language models" not "LLMs")
-   - Every bullet must contain at least 1-2 exact JD keyword phrases
-   - Keep all facts true — only change PHRASING to use JD terminology
-   - 2 bullets per project, each 1 sentence, dense with keywords
+1. "selectedProjects": 4-5 project names (exact names from list above) ordered by relevance to JD.
 
-3. "experienceOverrides": Rewrite bullets for BOTH work experience entries to inject JD keywords. Keys: "DevOps Engineer" and "Software Development Intern". Same rules as bulletOverrides. 3 bullets each.
+2. "bulletOverrides": For EVERY selected project, rewrite ALL its bullets per the rules. Key = exact project name.
 
-4. "tailoredObjective": 1-2 sentences containing 6-8 EXACT keyword phrases from the JD packed in. Must be factual to Shreya's background. Start with the role title from JD if possible.
+3. "experienceOverrides": Rewrite ALL bullets for BOTH roles per the rules. Keys must be "DevOps Engineer" and "Software Development Intern".
+
+4. "tailoredObjective": 1-2 sentences using 6-8 exact keyword phrases from the JD. Only reference skills/tools present in the candidate's background above — no invented claims.
 
 5. "coursework": 5-7 courses most relevant to JD.
 
-6. "skills": Reorder each category so JD-matching terms appear first. If the JD mentions a skill/tool that's in the master list, put it first. Keep all existing items.
+6. "skills": Reorder each category so JD-matching terms come first. Keep all items — do not add new ones.
 
 Return JSON only — no explanation, no markdown fences:
 {
   "selectedProjects": ["exact project name 1", ...],
   "bulletOverrides": {
-    "Project Name": ["bullet with exact JD keywords", "bullet 2"]
+    "Project Name": ["rewritten bullet 1", "rewritten bullet 2"]
   },
   "experienceOverrides": {
-    "DevOps Engineer": ["rewritten bullet 1 using JD terms", "bullet 2", "bullet 3"],
-    "Software Development Intern": ["rewritten bullet 1 using JD terms", "bullet 2", "bullet 3"]
+    "DevOps Engineer": ["rewritten bullet 1", "bullet 2", "bullet 3"],
+    "Software Development Intern": ["rewritten bullet 1", "bullet 2", "bullet 3"]
   },
-  "tailoredObjective": "Dense 1-2 sentences with 6-8 exact JD keyword phrases",
+  "tailoredObjective": "1-2 sentences with 6-8 exact JD keyword phrases, factual only",
   "coursework": ["Course1", ...],
   "skills": [
     {"category": "ML/AI", "items": "JD-matching terms first, comma-separated"},
@@ -920,8 +927,10 @@ export async function generateResumePdf(
     await htmlToPdf(html, outputPath);
 
     // ── Copy to ~/Documents/applications ─────────────────────────────────────
+    // Use jobId suffix to prevent same-employer resumes overwriting each other
     if (employer) {
-      await copyToDocuments(outputPath, `${sanitizeFilename(employer)}_resume.pdf`);
+      const shortId = jobId.slice(0, 8);
+      await copyToDocuments(outputPath, `${sanitizeFilename(employer)}_${shortId}_resume.pdf`);
     }
 
     logger.info("Resume PDF generated", { jobId, outputPath, method: "structured-template" });
