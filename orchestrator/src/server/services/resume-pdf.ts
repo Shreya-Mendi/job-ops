@@ -217,6 +217,7 @@ const MASTER = {
 interface ResumeSelection {
   selectedProjects: string[];
   bulletOverrides: Record<string, string[]>;
+  experienceOverrides: Record<string, string[]>;
   tailoredObjective: string;
   coursework: string[];
   skills: Array<{ category: string; items: string }>;
@@ -234,7 +235,15 @@ const SELECTION_SCHEMA: JsonSchemaDefinition = {
       },
       bulletOverrides: {
         type: "object",
-        description: "For each selected project, rewrite its bullets to mirror exact keyword phrases from the JD. Keep all facts true — only change phrasing to match JD terminology. Each key is the exact project name.",
+        description: "For EVERY selected project, rewrite ALL bullets to use the EXACT keyword phrases from the JD. Every JD keyword that is factually applicable to this project MUST appear verbatim. Each key is the exact project name.",
+        additionalProperties: {
+          type: "array",
+          items: { type: "string" },
+        },
+      },
+      experienceOverrides: {
+        type: "object",
+        description: "For EVERY work experience entry, rewrite ALL bullets to use EXACT JD keyword phrases wherever factually accurate. Keys must be 'DevOps Engineer' and 'Software Development Intern'.",
         additionalProperties: {
           type: "array",
           items: { type: "string" },
@@ -242,7 +251,7 @@ const SELECTION_SCHEMA: JsonSchemaDefinition = {
       },
       tailoredObjective: {
         type: "string",
-        description: "1–2 sentence objective/summary injecting the top 4–6 exact keyword phrases from the JD. Example: 'AI/ML intern seeking to apply PyTorch-based deep learning and AWS SageMaker experience to research and development at [Company].' Keep it factual and specific.",
+        description: "1–2 sentence objective/summary that MUST contain the top 6–8 exact keyword phrases from the JD verbatim. Pack as many JD keywords as possible while staying factual. Example: 'AI/ML intern seeking to apply PyTorch-based deep learning, transformer model fine-tuning, and AWS SageMaker experience to large-scale ML research at [Company].'",
       },
       coursework: {
         type: "array",
@@ -262,50 +271,73 @@ const SELECTION_SCHEMA: JsonSchemaDefinition = {
         },
       },
     },
-    required: ["selectedProjects", "bulletOverrides", "tailoredObjective", "coursework", "skills"],
+    required: ["selectedProjects", "bulletOverrides", "experienceOverrides", "tailoredObjective", "coursework", "skills"],
     additionalProperties: false,
   },
 };
 
-const SELECTION_PROMPT_TEMPLATE = `You are tailoring a resume for a specific job application to maximize ATS keyword match score.
+const SELECTION_PROMPT_TEMPLATE = `You are an expert ATS resume optimizer. Your ONLY goal is to maximize keyword match between this resume and the job description. Every important term from the JD must appear verbatim somewhere in the resume.
 
 JOB DESCRIPTION:
 {jobDescription}
 
-AVAILABLE PROJECTS (choose 4-5 most relevant, order by relevance):
-- When2Speak — LLM Conversational Agent (NLP, RL, PyTorch, multi-agent, intervention policy)
-- UAV-SAR — Human Detection System Thermal (Computer Vision, Faster R-CNN, PyTorch, safety, SAR)
-- BMW Capstone — Industrial AI Decision System (Interpretable ML, Production AI, deployability, stakeholder)
-- Inflationship — Inflation Forecasting (Time-Series, SARIMAX, Feature Engineering, alternative data, CPI)
-- AI Audit — EU AI Act Compliance Tool (MLOps, FastAPI, NLP, Cloud Run, GCP, compliance, TF-IDF, MLflow)
-- Alba — AI Sustainability Footprint Tool (Chrome Extension, Privacy Engineering, sustainability, LLM emissions)
-- Wordle XAI Bot — Multimodal XAI Agent (Multimodal, Vision+NLP, Grad-CAM, Explainability)
-- Supreme Court Case Outcome Prediction — Explainable ML (Random Forest, PDP/ICE/ALE, judicial, SCDB)
-- Paper Trail — Epstein Case NLP System (FastAPI, RAG, NER, consequence classification, timeline UI)
-- Sourcing Happiness — World Happiness Analysis (Data Analysis, Visualization, regional trends)
+CANDIDATE BACKGROUND:
+- Work Experience: DevOps Engineer at Assetmantle (AWS/Hetzner, Docker, Kubernetes, CI/CD, blockchain microservices, 99%+ uptime); Software Dev Intern at HP Enterprise (Docker, Jenkins, REST APIs, Grafana/Prometheus, CI/CD)
+- Available Projects (pick 4-5):
+  * When2Speak — RL policy network for multi-agent dialogue, PyTorch, NLP, A/B testing, 10K-dialogue simulation
+  * UAV-SAR — Faster R-CNN fine-tuning on thermal imagery, PyTorch, CV pipeline, custom data loaders, safety-critical
+  * BMW Capstone — Interpretable ML for industrial decision-making, explainability, stakeholder requirements, production constraints
+  * Inflationship — SARIMAX + ML forecasting, alternative data, feature engineering, 0.67-1.69% MAPE, cross-validation
+  * AI Audit — EU AI Act compliance classifier, TF-IDF + logistic regression, FastAPI, Streamlit, GCP Cloud Run, MLflow
+  * Alba — Privacy-first Chrome extension, LLM emissions tracking, client-side computation, sustainability dashboard
+  * Wordle XAI Bot — Multimodal agent, vision + NLP, Grad-CAM explainability, real-time saliency
+  * Supreme Court — Random Forest on 13K cases, PDP/ICE/ALE explainability, 70% accuracy, 15% F1 improvement
+  * Paper Trail — RAG chatbot, NER, consequence classification, FastAPI, timeline UI, public document NLP
+  * Sourcing Happiness — Data analysis, animated visualizations, World Happiness Report (2019-2024)
 
 COURSEWORK OPTIONS: Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Vision, Explainable AI, Alternative Data, AI Security
 
-INSTRUCTIONS:
-1. Select 4-5 most relevant projects and list them in "selectedProjects" (exact names).
-2. For EACH selected project, provide "bulletOverrides" — rewrite the bullets to mirror the EXACT terminology from the JD (e.g. if JD says "Amazon SageMaker", prefer that over "cloud ML training"; if JD says "distributed training", use that phrase). Keep every claim 100% factual. 2 bullets per project max.
-3. Write a "tailoredObjective": 1-2 sentences using the top 4-6 exact keyword phrases from the JD. Must be factual and specific to Shreya's background.
-4. Choose "coursework" (5-7 courses most relevant to JD).
-5. For "skills", reorder items within each category so JD-matching terms appear first.
+MASTER SKILLS:
+- ML/AI: Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing
+- Frameworks & Tools: Python, PyTorch, TensorFlow, Scikit-learn, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash
+- Cloud & DevOps: AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana
 
-Return JSON only:
+STEP 1 — Extract keywords: Read the JD and list every technical term, tool, method, and skill mentioned. Note which ones are in the master skills/background already, and which are NEW (only add new ones if factually accurate).
+
+STEP 2 — Build the resume fields:
+
+1. "selectedProjects": 4-5 project names ordered by relevance to JD.
+
+2. "bulletOverrides": For EVERY selected project, rewrite ALL bullets to inject JD keywords verbatim. Rules:
+   - Use the EXACT phrasing from the JD (e.g. JD says "large language models" → use "large language models" not "LLMs")
+   - Every bullet must contain at least 1-2 exact JD keyword phrases
+   - Keep all facts true — only change PHRASING to use JD terminology
+   - 2 bullets per project, each 1 sentence, dense with keywords
+
+3. "experienceOverrides": Rewrite bullets for BOTH work experience entries to inject JD keywords. Keys: "DevOps Engineer" and "Software Development Intern". Same rules as bulletOverrides. 3 bullets each.
+
+4. "tailoredObjective": 1-2 sentences containing 6-8 EXACT keyword phrases from the JD packed in. Must be factual to Shreya's background. Start with the role title from JD if possible.
+
+5. "coursework": 5-7 courses most relevant to JD.
+
+6. "skills": Reorder each category so JD-matching terms appear first. If the JD mentions a skill/tool that's in the master list, put it first. Keep all existing items.
+
+Return JSON only — no explanation, no markdown fences:
 {
   "selectedProjects": ["exact project name 1", ...],
   "bulletOverrides": {
-    "Project Name 1": ["rewritten bullet 1 with JD keywords", "rewritten bullet 2"],
-    "Project Name 2": [...]
+    "Project Name": ["bullet with exact JD keywords", "bullet 2"]
   },
-  "tailoredObjective": "1-2 sentence objective with exact JD keywords",
+  "experienceOverrides": {
+    "DevOps Engineer": ["rewritten bullet 1 using JD terms", "bullet 2", "bullet 3"],
+    "Software Development Intern": ["rewritten bullet 1 using JD terms", "bullet 2", "bullet 3"]
+  },
+  "tailoredObjective": "Dense 1-2 sentences with 6-8 exact JD keyword phrases",
   "coursework": ["Course1", ...],
   "skills": [
-    {"category": "ML/AI", "items": "reordered comma-separated items, JD-matching first"},
-    {"category": "Frameworks & Tools", "items": "reordered items"},
-    {"category": "Cloud & DevOps", "items": "reordered items"}
+    {"category": "ML/AI", "items": "JD-matching terms first, comma-separated"},
+    {"category": "Frameworks & Tools", "items": "JD-matching terms first"},
+    {"category": "Cloud & DevOps", "items": "JD-matching terms first"}
   ]
 }`;
 
@@ -396,13 +428,16 @@ function buildResumeHtmlFromData(selection: ResumeSelection): string {
   }).join("");
 
   // ── Work Experience ───────────────────────────────────────────────────────
-  const experienceHtml = MASTER.experience.map((e) => `
+  const experienceHtml = MASTER.experience.map((e) => {
+    const expOverride = selection.experienceOverrides?.[e.title];
+    const expBullets = (expOverride && expOverride.length > 0) ? expOverride : e.bullets;
+    return `
     <div class="row" style="margin-top:4px;">
       <span><span class="bold">${esc(e.title)}</span> | ${esc(e.company)}</span>
       <span class="date">${esc(e.date)}</span>
     </div>
-    <ul>${e.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>`
-  ).join("");
+    <ul>${expBullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>`;
+  }).join("");
 
   // ── Leadership ────────────────────────────────────────────────────────────
   const leadershipHtml = MASTER.leadership.map((l) => `
@@ -814,24 +849,12 @@ export async function generateResumePdf(
 
     const outputPath = join(OUTPUT_DIR, `resume_${jobId}.pdf`);
 
-    // ── Try Claude vision API first ───────────────────────────────────────────
+    // ── LLM selection + structured template (guaranteed keyword injection) ─────
+    // Note: Claude vision path was removed — the structured template gives full
+    // control over ATS keyword placement in bullets, experience, skills, and objective.
     let html: string | null = null;
-    let usedVision = false;
 
-    const apiKey = await getSetting("llmApiKey");
-    if (apiKey) {
-      html = await generateResumeViaClaudeVision(jobId, jobDescription, apiKey);
-      if (html) {
-        usedVision = true;
-      } else {
-        logger.warn("Claude vision API failed — falling back to hardcoded template", { jobId });
-      }
-    } else {
-      logger.warn("No llmApiKey configured — falling back to hardcoded template", { jobId });
-    }
-
-    // ── Fallback: LLM selection + hardcoded template ──────────────────────────
-    if (!html) {
+    {
       const [overrideModel, overrideModelTailoring] = await Promise.all([
         getSetting("model"),
         getSetting("modelTailoring"),
@@ -844,7 +867,7 @@ export async function generateResumePdf(
 
       const prompt = SELECTION_PROMPT_TEMPLATE.replace(
         "{jobDescription}",
-        jobDescription.slice(0, 3000),
+        jobDescription.slice(0, 5000),
       );
 
       const llm = new LlmService();
@@ -859,6 +882,7 @@ export async function generateResumePdf(
       const DEFAULT_SELECTION: ResumeSelection = {
         selectedProjects: ["When2Speak", "UAV-SAR", "AI Audit", "BMW Capstone"],
         bulletOverrides: {},
+        experienceOverrides: {},
         tailoredObjective: "",
         coursework: ["Deep Learning", "LLMs & Intelligent Agents", "Reinforcement Learning", "Computer Vision", "Explainable AI"],
         skills: [
@@ -900,7 +924,7 @@ export async function generateResumePdf(
       await copyToDocuments(outputPath, `${sanitizeFilename(employer)}_resume.pdf`);
     }
 
-    logger.info("Resume PDF generated", { jobId, outputPath, method: usedVision ? "claude-vision" : "hardcoded-template" });
+    logger.info("Resume PDF generated", { jobId, outputPath, method: "structured-template" });
     return { success: true, pdfPath: outputPath };
 
   } catch (error) {
