@@ -204,8 +204,8 @@ const MASTER = {
   ],
 
   skillCategories: {
-    "ML/AI": "Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing",
-    "Frameworks & Tools": "Python, PyTorch, TensorFlow, Scikit-learn, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash",
+    "ML/AI": "Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Agentic AI, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing, Optimization, Data Collection, Data Cleaning, Exploratory Data Analysis",
+    "Frameworks & Tools": "Python, PyTorch, TensorFlow, Scikit-learn, NumPy, Pandas, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash",
     "Cloud & DevOps": "AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana",
   } as Record<string, string>,
 };
@@ -299,9 +299,9 @@ WORK EXPERIENCE:
 • DevOps Engineer: [1] "Architected and optimized AWS/Hetzner infrastructure and CI/CD pipelines (Docker, Kubernetes), reducing operational costs by 38% while improving reliability and uptime." [2] "Engineered automated rollout/rollback policies to reduce deployment risk and improve mean time to recovery (MTTR) across production environments." [3] "Managed containerized microservices for a blockchain-based platform, maintaining 99%+ availability across distributed nodes; improved security posture across cloud resources."
 • Software Development Intern: [1] "Developed and deployed Dockerized services on Linux; automated deployments with Jenkins and shell scripting." [2] "Integrated REST APIs in Python for monitoring; expanded observability coverage with Grafana/Prometheus to improve stability and reduce incident detection time." [3] "Streamlined CI/CD release processes across service teams, accelerating deployment cycles and reducing release friction."
 
-━━━ SKILLS ━━━
-- ML/AI: Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing
-- Frameworks & Tools: Python, PyTorch, TensorFlow, Scikit-learn, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash
+━━━ FULL SKILLS POOL (all items the candidate genuinely has) ━━━
+- ML/AI: Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Agentic AI, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing, Optimization, Data Collection, Data Cleaning, Exploratory Data Analysis
+- Frameworks & Tools: Python, PyTorch, TensorFlow, Scikit-learn, NumPy, Pandas, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash
 - Cloud & DevOps: AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana
 
 ━━━ COURSEWORK OPTIONS ━━━
@@ -309,7 +309,7 @@ Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Visio
 
 ━━━ REWRITING RULES — FOLLOW STRICTLY ━━━
 1. STAR structure: reframe each bullet as Action → Method/Tool → Result where the original supports it
-2. Substitute words with JD keyword equivalents where meaning is the same (e.g. "NLP" → "natural language processing" if JD uses that phrase)
+2. Substitute words with JD keyword equivalents where meaning is the same (e.g. "NLP" → "natural language processing" if JD uses that phrase; "agent" → "agentic AI" if JD uses that; "data preprocessing" → "data cleaning" etc.)
 3. NEVER change, round, or omit any number, percentage, or metric — copy them exactly from the originals above (e.g. "25%", "0.67–1.69% MAPE", "38%", "99%+", "~13K", "~15%", "~70%")
 4. NEVER add a tool, technology, or claim that is not in the original bullet
 5. NEVER merge two bullets into one or split one into two — output the same count as input
@@ -317,9 +317,13 @@ Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Visio
 
 ━━━ OUTPUT STEPS ━━━
 
+STEP 1 — Keyword audit: List every technical keyword/skill/tool from the JD. Then check which ones are already covered in the skills pool above. Any JD keyword that maps to something in the skills pool MUST appear in the output skills section (even if it uses a synonym — put the JD's exact phrasing first).
+
+STEP 2 — Build the JSON fields:
+
 1. "selectedProjects": 4-5 project names (exact names from list above) ordered by relevance to JD.
 
-2. "bulletOverrides": For EVERY selected project, rewrite ALL its bullets per the rules. Key = exact project name.
+2. "bulletOverrides": For EVERY selected project, rewrite ALL its bullets per the rules above. Use JD keyword substitution wherever applicable. Key = exact project name.
 
 3. "experienceOverrides": Rewrite ALL bullets for BOTH roles per the rules. Keys must be "DevOps Engineer" and "Software Development Intern".
 
@@ -327,7 +331,7 @@ Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Visio
 
 5. "coursework": 5-7 courses most relevant to JD.
 
-6. "skills": Reorder each category so JD-matching terms come first. Keep all items — do not add new ones.
+6. "skills": For each category, put JD-matching terms first. If the JD uses a specific phrasing for a skill that's in the pool (e.g. JD says "pandas" and pool has "Pandas"), put it at the front using the JD's casing. Include ALL items from the pool — never drop any.
 
 Return JSON only — no explanation, no markdown fences:
 {
