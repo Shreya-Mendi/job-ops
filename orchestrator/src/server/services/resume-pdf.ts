@@ -327,7 +327,12 @@ STEP 2 — Build the JSON fields:
 
 3. "experienceOverrides": Rewrite ALL bullets for BOTH roles per the rules. Keys must be "DevOps Engineer" and "Software Development Intern".
 
-4. "tailoredObjective": 1-2 sentences using 6-8 exact keyword phrases from the JD. Only reference skills/tools present in the candidate's background above — no invented claims.
+4. "tailoredObjective": 1-2 sentences using 6-8 exact keyword phrases from the JD. STRICT rules:
+   - Must start with: "MEng AI student at Duke University" or "[Role from JD] with MEng in AI from Duke University"
+   - Never say "Masters in Computer Science" or any degree/field other than "MEng in Artificial Intelligence" / "MEng AI"
+   - Never use JD keywords as adjectives modifying the candidate (e.g. NEVER "Highly agentic engineer" — instead say "experienced in agentic AI systems")
+   - Structure: "[Role/identity] with [real background], experienced in [JD keyword 1], [JD keyword 2], and [JD keyword 3], applying [JD keyword 4] to [JD keyword 5]."
+   - Only reference skills/tools that exist in the candidate background above — no invented claims
 
 5. "coursework": 5-7 courses most relevant to JD.
 
