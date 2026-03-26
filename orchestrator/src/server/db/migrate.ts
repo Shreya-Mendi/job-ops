@@ -663,7 +663,10 @@ for (const migration of migrations) {
           .includes("alter table post_application_messages add column") ||
         migration
           .toLowerCase()
-          .includes("alter table stage_events add column")) &&
+          .includes("alter table stage_events add column") ||
+        migration
+          .toLowerCase()
+          .includes("alter table pipeline_presets add column")) &&
       message.toLowerCase().includes("duplicate column name");
 
     if (isDuplicateColumn) {
