@@ -155,6 +155,28 @@ const MASTER = {
         "Analyzed World Happiness Report data (2019–2024) to study regional/country trends; built animated and comparative visualizations.",
       ],
     },
+    {
+      key: "QuietSky",
+      name: "QuietSky",
+      subtitle: "Speech Practice Game with ASR",
+      tech: "React · FastAPI · Whisper · VOSK · Web Audio API",
+      date: "2025",
+      bullets: [
+        "Built a speech-practice game with four gameplay modes using Whisper and VOSK ASR for real-time transcription; evaluated speech continuity, rhythm, and effort without penalizing disfluencies.",
+        "Developed a FastAPI backend with Web Audio API and ffmpeg for audio capture and processing, integrating automatic speech recognition into a full-stack React + Vite application.",
+      ],
+    },
+    {
+      key: "Tradecraft",
+      name: "Tradecraft",
+      subtitle: "Multi-Agent AI Paper Trading Platform",
+      tech: "Agentic AI · Reinforcement Learning · TypeScript · GitHub Models",
+      date: "2025",
+      bullets: [
+        "Orchestrated five specialized AI agents (Macro Researcher, Alpha Signal Designer, Risk Manager, Execution Agent, Compliance Supervisor) using GPT-4o, Claude, and Llama via GitHub Models for coordinated investment decisions.",
+        "Implemented Q-table reinforcement learning for execution strategy and an immutable audit trail for agent accountability and compliance logging.",
+      ],
+    },
   ],
 
   experience: [
@@ -375,6 +397,8 @@ PROJECTS:
 • Wordle XAI Bot: [1] "Built a multimodal agent that plays Wordle using vision + NLP models, surfacing token-level saliency to explain decisions in real time." [2] "Integrated Grad-CAM style explainability to trace errors and visualize transparent human–AI interactions."
 • Supreme Court: [1] "Modeled ~13K Supreme Court cases with Random Forest; used PDP/ICE/ALE to explain predictive drivers of judicial outcomes." [2] "Improved F1-score by ~15% and achieved ~70% accuracy on held-out case outcome prediction."
 • Sourcing Happiness: [1] "Analyzed World Happiness Report data (2019–2024) to study regional/country trends; built animated and comparative visualizations."
+• QuietSky: [1] "Built a speech-practice game with four gameplay modes using Whisper and VOSK ASR for real-time transcription; evaluated speech continuity, rhythm, and effort without penalizing disfluencies." [2] "Developed a FastAPI backend with Web Audio API and ffmpeg for audio capture and processing, integrating automatic speech recognition into a full-stack React + Vite application."
+• Tradecraft: [1] "Orchestrated five specialized AI agents (Macro Researcher, Alpha Signal Designer, Risk Manager, Execution Agent, Compliance Supervisor) using GPT-4o, Claude, and Llama via GitHub Models for coordinated investment decisions." [2] "Implemented Q-table reinforcement learning for execution strategy and an immutable audit trail for agent accountability and compliance logging."
 
 WORK EXPERIENCE:
 • DevOps Engineer: [1] "Architected and optimized AWS/Hetzner infrastructure and CI/CD pipelines (Docker, Kubernetes), reducing operational costs by 38% while improving reliability and uptime." [2] "Engineered automated rollout/rollback policies to reduce deployment risk and improve mean time to recovery (MTTR) across production environments." [3] "Managed containerized microservices for a blockchain-based platform, maintaining 99%+ availability across distributed nodes; improved security posture across cloud resources."
@@ -386,15 +410,14 @@ WORK EXPERIENCE:
 - Cloud & DevOps: AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana
 
 ━━━ COURSEWORK OPTIONS ━━━
-Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Vision, Explainable AI, Alternative Data, AI Security
+Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Vision, Explainable AI, Alternative Data, AI Security, AI in the Physical World
 
 ━━━ FORBIDDEN DOMAINS — NEVER introduce these into any bullet, objective, or skill unless the exact term already appears in the original bullet text above ━━━
 Healthcare & compliance: HIPAA, EHR, EMR, HL7, FHIR, PHI, clinical, patient data, medical records, healthcare software, telehealth, health tech
 Defense & government: ITAR, DoD, FISMA, FedRAMP, classified, defense, military, munitions, national security, clearance
-Finance & legal: SOC2, PCI-DSS, SEC, FINRA, trading, hedge fund, legal discovery, court, litigation
-Voice & speech: voice models, speech recognition, transcription, ASR, TTS, speaker diarization, audio processing
-Robotics & hardware: ROS, embedded systems, RTOS, firmware, FPGA, microcontroller, actuator, sensor fusion
-If the JD is from one of these domains, you may match the company's general AI/ML/software keywords — but do NOT adopt domain-specific terminology as if the candidate has worked in that domain.
+Finance & compliance: SOC2, PCI-DSS, SEC, FINRA, hedge fund, legal discovery, court, litigation
+NOTE — Voice/speech (ASR, Whisper, transcription) and embedded/physical systems ARE part of the candidate's background (QuietSky project uses Whisper/VOSK; ECE degree covers embedded systems). These are allowed when the JD calls for them.
+If the JD is from a forbidden domain, match the company's general AI/ML/software keywords only — do NOT adopt domain-specific compliance or regulatory terminology.
 
 ━━━ REWRITING RULES — FOLLOW STRICTLY ━━━
 1. STAR structure: reframe each bullet as Action → Method/Tool → Result where the original supports it
