@@ -69,7 +69,7 @@ const MASTER = {
       date: "Jan 2026 – Present",
       bullets: [
         "Trained a lightweight RL policy network for multi-agent dialogue intervention using PyTorch and NLP; reduced unnecessary interventions by 25% while maintaining task success rate, validated on a 10,000-dialogue simulation suite via A/B testing.",
-        "Applied role-prompting, prompt engineering, and policy gradient methods to optimize agent behavior in real-time conversational AI systems.",
+        "Applied role-prompting, prompt engineering, and policy gradient methods to optimize intervention timing in real-time conversational AI systems, improving agent decision quality across adversarial dialogue scenarios.",
       ],
     },
     {
@@ -80,7 +80,7 @@ const MASTER = {
       date: "Jan 2026 – Present",
       bullets: [
         "Fine-tuned Faster R-CNN on thermal SAR imagery with domain-specific augmentations (snow, smoke, sensor noise); achieved 20% recall improvement under adverse conditions with <5% clean-data accuracy loss.",
-        "Built end-to-end CV pipeline in PyTorch with custom data loaders, augmentation strategies, and model evaluation metrics optimized for safety-critical deployment.",
+        "Built an end-to-end CV pipeline in PyTorch with custom data loaders, augmentation strategies, and model evaluation metrics, enabling reproducible safety-critical deployment across harsh environmental conditions.",
       ],
     },
     {
@@ -91,6 +91,7 @@ const MASTER = {
       date: "Jan 2026 – Present",
       bullets: [
         "Scoping and prototyping an interpretable ML solution for industrial decision-making at BMW, balancing model performance with deployment constraints and stakeholder explainability requirements.",
+        "Collaborating with BMW engineers to translate production requirements into model design choices, ensuring the system meets real-world reliability and auditability standards.",
       ],
     },
     {
@@ -101,6 +102,7 @@ const MASTER = {
       date: "Sept 2025",
       bullets: [
         "Engineered a forecasting pipeline fusing port-traffic alternative data with CPI using SARIMAX and ML; achieved 0.67–1.69% MAPE across major CPI categories, outperforming CPI-only baselines via rolling cross-validation.",
+        "Designed feature engineering and cross-validation strategy to prevent data leakage across time-series folds, producing statistically robust inflation forecasts across 6 CPI sub-categories.",
       ],
     },
     {
@@ -111,6 +113,7 @@ const MASTER = {
       date: "Nov 2025",
       bullets: [
         "Built an explainable compliance classifier (TF-IDF + logistic regression + rule-based checks) mapping system behavior to EU AI Act articles; deployed FastAPI + Streamlit UI on GCP Cloud Run with MLflow experiment tracking.",
+        "Designed a rule-based NLP pipeline to automatically surface regulatory article violations, reducing manual compliance review effort for high-risk AI system documentation.",
       ],
     },
     {
@@ -120,7 +123,8 @@ const MASTER = {
       tech: "Chrome Extension · Privacy Engineering",
       date: "Nov 2025",
       bullets: [
-        "Shipped a privacy-first Chrome extension computing LLM energy, carbon, and water footprints client-side using emissions heuristics; included prompt optimization suggestions and a daily sustainability dashboard.",
+        "Shipped a privacy-first Chrome extension computing LLM energy, carbon, and water footprints client-side using emissions heuristics, eliminating server-side data collection while delivering real-time sustainability insights.",
+        "Implemented prompt optimization suggestions and a daily sustainability dashboard to help users reduce LLM resource consumption without sacrificing output quality.",
       ],
     },
     {
@@ -130,8 +134,8 @@ const MASTER = {
       tech: "Multimodal Agent · Vision + NLP · Grad-CAM · XAI",
       date: "Nov 2025",
       bullets: [
-        "Built a multimodal agent that plays Wordle using vision + NLP models, surfacing token-level saliency to explain decisions in real time.",
-        "Integrated Grad-CAM style explainability to trace errors and visualize transparent human–AI interactions.",
+        "Built a multimodal agent that plays Wordle using vision + NLP models, surfacing token-level saliency maps to explain each guess decision in real time.",
+        "Integrated Grad-CAM explainability to trace model errors and visualize attention patterns, enabling transparent human–AI interaction and interpretable failure analysis.",
       ],
     },
     {
@@ -141,18 +145,19 @@ const MASTER = {
       tech: "Random Forest · PDP/ICE/ALE · Explainability",
       date: "Oct 2025",
       bullets: [
-        "Modeled ~13K Supreme Court cases with Random Forest; used PDP/ICE/ALE to explain predictive drivers of judicial outcomes.",
-        "Improved F1-score by ~15% and achieved ~70% accuracy on held-out case outcome prediction.",
+        "Modeled ~13K Supreme Court cases with Random Forest; applied PDP/ICE/ALE analysis to identify and explain the top predictive drivers of judicial outcomes across case types.",
+        "Improved F1-score by ~15% through feature engineering and hyperparameter tuning, achieving ~70% accuracy on held-out case outcome prediction.",
       ],
     },
     {
       key: "Sourcing Happiness",
       name: "Sourcing Happiness",
       subtitle: "World Happiness Report Analysis",
-      tech: "Data Analysis · Visualization",
+      tech: "Data Analysis · Visualization · Python",
       date: "2026",
       bullets: [
-        "Analyzed World Happiness Report data (2019–2024) to study regional/country trends; built animated and comparative visualizations.",
+        "Analyzed World Happiness Report data (2019–2024) across 150+ countries to identify regional and temporal trends; built animated comparative visualizations to communicate macroeconomic and social wellbeing patterns.",
+        "Applied exploratory data analysis and statistical correlation techniques to surface relationships between GDP, social support, and happiness scores across income groups.",
       ],
     },
     {
@@ -162,8 +167,8 @@ const MASTER = {
       tech: "React · FastAPI · Whisper · VOSK · Web Audio API",
       date: "2025",
       bullets: [
-        "Built a speech-practice game with four gameplay modes using Whisper and VOSK ASR for real-time transcription; evaluated speech continuity, rhythm, and effort without penalizing disfluencies.",
-        "Developed a FastAPI backend with Web Audio API and ffmpeg for audio capture and processing, integrating automatic speech recognition into a full-stack React + Vite application.",
+        "Built a speech-practice game with four gameplay modes using Whisper and VOSK ASR for real-time transcription; evaluated speech continuity, rhythm, and effort without penalizing disfluencies, improving accessibility for non-native speakers.",
+        "Developed a FastAPI backend with Web Audio API and ffmpeg for audio capture and processing, delivering end-to-end automatic speech recognition in a full-stack React + Vite application with sub-second response latency.",
       ],
     },
     {
@@ -173,8 +178,8 @@ const MASTER = {
       tech: "Agentic AI · Reinforcement Learning · TypeScript · GitHub Models",
       date: "2025",
       bullets: [
-        "Orchestrated five specialized AI agents (Macro Researcher, Alpha Signal Designer, Risk Manager, Execution Agent, Compliance Supervisor) using GPT-4o, Claude, and Llama via GitHub Models for coordinated investment decisions.",
-        "Implemented Q-table reinforcement learning for execution strategy and an immutable audit trail for agent accountability and compliance logging.",
+        "Orchestrated five specialized AI agents (Macro Researcher, Alpha Signal Designer, Risk Manager, Execution Agent, Compliance Supervisor) using GPT-4o, Claude, and Llama via GitHub Models for coordinated, role-separated investment decisions.",
+        "Implemented Q-table reinforcement learning for adaptive execution strategy selection and an immutable audit trail for agent accountability, enabling full compliance logging across all trading decisions.",
       ],
     },
     {
@@ -229,9 +234,9 @@ const MASTER = {
       company: "Assetmantle Pvt. Ltd. (Blockchain Infrastructure)",
       date: "Sept 2023 – May 2025",
       bullets: [
-        "Architected and optimized AWS/Hetzner infrastructure and CI/CD pipelines (Docker, Kubernetes), reducing operational costs by 38% while improving reliability and uptime.",
-        "Engineered automated rollout/rollback policies to reduce deployment risk and improve mean time to recovery (MTTR) across production environments.",
-        "Managed containerized microservices for a blockchain-based platform, maintaining 99%+ availability across distributed nodes; improved security posture across cloud resources.",
+        "Architected and optimized AWS/Hetzner infrastructure and CI/CD pipelines (Docker, Kubernetes) for a distributed blockchain platform, reducing operational costs by 38% while improving reliability and uptime.",
+        "Engineered automated rollout/rollback policies and deployment guardrails, reducing deployment risk and improving mean time to recovery (MTTR) across all production environments.",
+        "Managed containerized microservices across distributed nodes, maintaining 99%+ availability; hardened security posture across cloud resources through access controls and vulnerability audits.",
       ],
     },
     {
@@ -239,9 +244,9 @@ const MASTER = {
       company: "Hewlett Packard Enterprise GlobalSoft",
       date: "Jan 2023 – Jul 2023",
       bullets: [
-        "Developed and deployed Dockerized services on Linux; automated deployments with Jenkins and shell scripting.",
-        "Integrated REST APIs in Python for monitoring; expanded observability coverage with Grafana/Prometheus to improve stability and reduce incident detection time.",
-        "Streamlined CI/CD release processes across service teams, accelerating deployment cycles and reducing release friction.",
+        "Developed and deployed Dockerized services on Linux, automating deployments with Jenkins and shell scripting to reduce manual release effort across service teams.",
+        "Integrated REST APIs in Python for infrastructure monitoring; expanded observability coverage with Grafana and Prometheus dashboards, improving system stability and reducing incident detection time.",
+        "Streamlined CI/CD release processes across multiple service teams, accelerating deployment cycles and reducing release friction through pipeline standardization.",
       ],
     },
   ],
@@ -432,25 +437,25 @@ JOB DESCRIPTION:
 ━━━ ORIGINAL BULLETS (source of truth — every number/metric must be copied character-for-character) ━━━
 
 PROJECTS:
-• When2Speak: [1] "Trained a lightweight RL policy network for multi-agent dialogue intervention using PyTorch and NLP; reduced unnecessary interventions by 25% while maintaining task success rate, validated on a 10,000-dialogue simulation suite via A/B testing." [2] "Applied role-prompting, prompt engineering, and policy gradient methods to optimize agent behavior in real-time conversational AI systems."
-• UAV-SAR: [1] "Fine-tuned Faster R-CNN on thermal SAR imagery with domain-specific augmentations (snow, smoke, sensor noise); achieved 20% recall improvement under adverse conditions with <5% clean-data accuracy loss." [2] "Built end-to-end CV pipeline in PyTorch with custom data loaders, augmentation strategies, and model evaluation metrics optimized for safety-critical deployment."
-• BMW Capstone: [1] "Scoping and prototyping an interpretable ML solution for industrial decision-making at BMW, balancing model performance with deployment constraints and stakeholder explainability requirements."
-• Inflationship: [1] "Engineered a forecasting pipeline fusing port-traffic alternative data with CPI using SARIMAX and ML; achieved 0.67–1.69% MAPE across major CPI categories, outperforming CPI-only baselines via rolling cross-validation."
-• AI Audit: [1] "Built an explainable compliance classifier (TF-IDF + logistic regression + rule-based checks) mapping system behavior to EU AI Act articles; deployed FastAPI + Streamlit UI on GCP Cloud Run with MLflow experiment tracking."
-• Alba: [1] "Shipped a privacy-first Chrome extension computing LLM energy, carbon, and water footprints client-side using emissions heuristics; included prompt optimization suggestions and a daily sustainability dashboard."
-• Wordle XAI Bot: [1] "Built a multimodal agent that plays Wordle using vision + NLP models, surfacing token-level saliency to explain decisions in real time." [2] "Integrated Grad-CAM style explainability to trace errors and visualize transparent human–AI interactions."
-• Supreme Court: [1] "Modeled ~13K Supreme Court cases with Random Forest; used PDP/ICE/ALE to explain predictive drivers of judicial outcomes." [2] "Improved F1-score by ~15% and achieved ~70% accuracy on held-out case outcome prediction."
-• Sourcing Happiness: [1] "Analyzed World Happiness Report data (2019–2024) to study regional/country trends; built animated and comparative visualizations."
-• QuietSky: [1] "Built a speech-practice game with four gameplay modes using Whisper and VOSK ASR for real-time transcription; evaluated speech continuity, rhythm, and effort without penalizing disfluencies." [2] "Developed a FastAPI backend with Web Audio API and ffmpeg for audio capture and processing, integrating automatic speech recognition into a full-stack React + Vite application."
-• Tradecraft: [1] "Orchestrated five specialized AI agents (Macro Researcher, Alpha Signal Designer, Risk Manager, Execution Agent, Compliance Supervisor) using GPT-4o, Claude, and Llama via GitHub Models for coordinated investment decisions." [2] "Implemented Q-table reinforcement learning for execution strategy and an immutable audit trail for agent accountability and compliance logging."
+• When2Speak: [1] "Trained a lightweight RL policy network for multi-agent dialogue intervention using PyTorch and NLP; reduced unnecessary interventions by 25% while maintaining task success rate, validated on a 10,000-dialogue simulation suite via A/B testing." [2] "Applied role-prompting, prompt engineering, and policy gradient methods to optimize intervention timing in real-time conversational AI systems, improving agent decision quality across adversarial dialogue scenarios."
+• UAV-SAR: [1] "Fine-tuned Faster R-CNN on thermal SAR imagery with domain-specific augmentations (snow, smoke, sensor noise); achieved 20% recall improvement under adverse conditions with <5% clean-data accuracy loss." [2] "Built an end-to-end CV pipeline in PyTorch with custom data loaders, augmentation strategies, and model evaluation metrics, enabling reproducible safety-critical deployment across harsh environmental conditions."
+• BMW Capstone: [1] "Scoping and prototyping an interpretable ML solution for industrial decision-making at BMW, balancing model performance with deployment constraints and stakeholder explainability requirements." [2] "Collaborating with BMW engineers to translate production requirements into model design choices, ensuring the system meets real-world reliability and auditability standards."
+• Inflationship: [1] "Engineered a forecasting pipeline fusing port-traffic alternative data with CPI using SARIMAX and ML; achieved 0.67–1.69% MAPE across major CPI categories, outperforming CPI-only baselines via rolling cross-validation." [2] "Designed feature engineering and cross-validation strategy to prevent data leakage across time-series folds, producing statistically robust inflation forecasts across 6 CPI sub-categories."
+• AI Audit: [1] "Built an explainable compliance classifier (TF-IDF + logistic regression + rule-based checks) mapping system behavior to EU AI Act articles; deployed FastAPI + Streamlit UI on GCP Cloud Run with MLflow experiment tracking." [2] "Designed a rule-based NLP pipeline to automatically surface regulatory article violations, reducing manual compliance review effort for high-risk AI system documentation."
+• Alba: [1] "Shipped a privacy-first Chrome extension computing LLM energy, carbon, and water footprints client-side using emissions heuristics, eliminating server-side data collection while delivering real-time sustainability insights." [2] "Implemented prompt optimization suggestions and a daily sustainability dashboard to help users reduce LLM resource consumption without sacrificing output quality."
+• Wordle XAI Bot: [1] "Built a multimodal agent that plays Wordle using vision + NLP models, surfacing token-level saliency maps to explain each guess decision in real time." [2] "Integrated Grad-CAM explainability to trace model errors and visualize attention patterns, enabling transparent human–AI interaction and interpretable failure analysis."
+• Supreme Court: [1] "Modeled ~13K Supreme Court cases with Random Forest; applied PDP/ICE/ALE analysis to identify and explain the top predictive drivers of judicial outcomes across case types." [2] "Improved F1-score by ~15% through feature engineering and hyperparameter tuning, achieving ~70% accuracy on held-out case outcome prediction."
+• Sourcing Happiness: [1] "Analyzed World Happiness Report data (2019–2024) across 150+ countries to identify regional and temporal trends; built animated comparative visualizations to communicate macroeconomic and social wellbeing patterns." [2] "Applied exploratory data analysis and statistical correlation techniques to surface relationships between GDP, social support, and happiness scores across income groups."
+• QuietSky: [1] "Built a speech-practice game with four gameplay modes using Whisper and VOSK ASR for real-time transcription; evaluated speech continuity, rhythm, and effort without penalizing disfluencies, improving accessibility for non-native speakers." [2] "Developed a FastAPI backend with Web Audio API and ffmpeg for audio capture and processing, delivering end-to-end automatic speech recognition in a full-stack React + Vite application with sub-second response latency."
+• Tradecraft: [1] "Orchestrated five specialized AI agents (Macro Researcher, Alpha Signal Designer, Risk Manager, Execution Agent, Compliance Supervisor) using GPT-4o, Claude, and Llama via GitHub Models for coordinated, role-separated investment decisions." [2] "Implemented Q-table reinforcement learning for adaptive execution strategy selection and an immutable audit trail for agent accountability, enabling full compliance logging across all trading decisions."
 • PoolCue-Assist: [1] "Designed a wearable IMU system on a Raspberry Pi 4 using an MPU6050 sensor to classify billiards strokes as GOOD/BAD via a Decision Tree classifier; achieved perfect F1 score (1.000) across 5-fold cross-validation with ~100 Hz inference and <1s feedback latency." [2] "Identified 129–246x rotational variance separation between good and bad strokes; delivered real-time feedback via LCD, RGB LEDs, and audio — no coach required."
 • Contextual Boost LLMs: [1] "Investigated role-conditioned prompting on graduate-level STEM questions using the OpenAI API; identified domain-specific accuracy shifts (Physics +3pp) and validated statistical significance using McNemar's exact test, Wilcoxon signed-rank, and paired t-tests (p=0.65 overall)." [2] "Contributed statistical analysis pipeline and domain-level reasoning breakdown across Physics, Astrophysics, and Chemistry for a collaborative LLM prompt engineering study."
 • MindGuard: [1] "Developed a benchmark of 1,200 expert-annotated synthetic prompts across 5 clinically-validated severity tiers to evaluate AI model safety calibration in mental health crisis scenarios; achieved Fleiss' Kappa >0.8 inter-rater reliability." [2] "Designed a composite safety score weighting Calibration Accuracy (40%), Critical Miss Rate (40%), Consistency (10%), and Over-Escalation Rate (10%); benchmarked GPT-4 (0.847) against a human counselor baseline (0.961)."
 • SemanticJury: [1] "Built a semantic search engine for legal research using sentence-transformers (all-MiniLM-L6-v2) and ChromaDB vector database, enabling natural language queries over case law with citation network discovery." [2] "Deployed a Gradio UI supporting retrieval-augmented search across landmark Supreme Court cases; implemented semantic embeddings and vector similarity search for legal information retrieval."
 
 WORK EXPERIENCE:
-• DevOps Engineer: [1] "Architected and optimized AWS/Hetzner infrastructure and CI/CD pipelines (Docker, Kubernetes), reducing operational costs by 38% while improving reliability and uptime." [2] "Engineered automated rollout/rollback policies to reduce deployment risk and improve mean time to recovery (MTTR) across production environments." [3] "Managed containerized microservices for a blockchain-based platform, maintaining 99%+ availability across distributed nodes; improved security posture across cloud resources."
-• Software Development Intern: [1] "Developed and deployed Dockerized services on Linux; automated deployments with Jenkins and shell scripting." [2] "Integrated REST APIs in Python for monitoring; expanded observability coverage with Grafana/Prometheus to improve stability and reduce incident detection time." [3] "Streamlined CI/CD release processes across service teams, accelerating deployment cycles and reducing release friction."
+• DevOps Engineer: [1] "Architected and optimized AWS/Hetzner infrastructure and CI/CD pipelines (Docker, Kubernetes) for a distributed blockchain platform, reducing operational costs by 38% while improving reliability and uptime." [2] "Engineered automated rollout/rollback policies and deployment guardrails, reducing deployment risk and improving mean time to recovery (MTTR) across all production environments." [3] "Managed containerized microservices across distributed nodes, maintaining 99%+ availability; hardened security posture across cloud resources through access controls and vulnerability audits."
+• Software Development Intern: [1] "Developed and deployed Dockerized services on Linux, automating deployments with Jenkins and shell scripting to reduce manual release effort across service teams." [2] "Integrated REST APIs in Python for infrastructure monitoring; expanded observability coverage with Grafana and Prometheus dashboards, improving system stability and reducing incident detection time." [3] "Streamlined CI/CD release processes across multiple service teams, accelerating deployment cycles and reducing release friction through pipeline standardization."
 
 ━━━ FULL SKILLS POOL (all items the candidate genuinely has) ━━━
 - ML/AI: Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Agentic AI, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing, Optimization, Data Collection, Data Cleaning, Exploratory Data Analysis
