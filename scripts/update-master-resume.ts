@@ -6,8 +6,11 @@
  * update for the MASTER.projects array in resume-pdf.ts.
  *
  * Usage:
- *   npx tsx scripts/update-master-resume.ts
- *   npx tsx scripts/update-master-resume.ts --token ghp_xxxx   # for private repos / higher rate limit
+ *   npx tsx scripts/update-master-resume.ts --token=ghp_xxxx   # recommended — needed for contribution search
+ *   npx tsx scripts/update-master-resume.ts                     # public repos only, limited contribution scan
+ *
+ * To get a token: github.com → Settings → Developer settings → Personal access tokens → Fine-grained
+ * Permissions needed: read:user, read:repo (public repos only is fine)
  *
  * The script ONLY prints suggestions — it never auto-edits resume-pdf.ts.
  * Review the output and paste what you want into MASTER.projects manually.
@@ -93,30 +96,50 @@ async function getAllRepos(): Promise<RepoInfo[]> {
 }
 
 async function getContributedRepos(): Promise<RepoInfo[]> {
-  // Get repos where user has pushed commits (events API)
+  const repoNames = new Set<string>();
+
+  // 1. Commits search API — finds all repos with commits authored by user
+  //    Requires a token for best results (unauthenticated has low rate limits)
+  try {
+    const search = await gh(
+      `/search/commits?q=author:${GITHUB_USERNAME}&per_page=100&sort=author-date`,
+    ) as { items: Array<{ repository: { full_name: string } }> };
+    for (const item of search.items ?? []) {
+      const fullName = item.repository.full_name;
+      if (!fullName.startsWith(`${GITHUB_USERNAME}/`)) {
+        repoNames.add(fullName);
+      }
+    }
+  } catch (e) {
+    console.warn("⚠️  Commits search failed (needs token for full results):", (e as Error).message);
+  }
+
+  // 2. Events API — catches recent push events not in commits search
   try {
     const events = await gh(`/users/${GITHUB_USERNAME}/events/public?per_page=100`) as Array<{
       type: string;
       repo: { name: string };
     }>;
-    const pushed = events
-      .filter((e) => e.type === "PushEvent")
-      .map((e) => e.repo.name)
-      .filter((name) => !name.startsWith(`${GITHUB_USERNAME}/`));
-    const unique = [...new Set(pushed)];
-    const results: RepoInfo[] = [];
-    for (const fullName of unique.slice(0, 10)) {
-      try {
-        const repo = await gh(`/repos/${fullName}`) as RepoInfo;
-        results.push(repo);
-      } catch {
-        // skip inaccessible repos
+    for (const e of events) {
+      if (e.type === "PushEvent" && !e.repo.name.startsWith(`${GITHUB_USERNAME}/`)) {
+        repoNames.add(e.repo.name);
       }
     }
-    return results;
   } catch {
-    return [];
+    // ignore
   }
+
+  // 3. Fetch full repo metadata for each unique contributed repo
+  const results: RepoInfo[] = [];
+  for (const fullName of repoNames) {
+    try {
+      const repo = await gh(`/repos/${fullName}`) as RepoInfo;
+      results.push(repo);
+    } catch {
+      // skip inaccessible / deleted repos
+    }
+  }
+  return results;
 }
 
 function extractBullets(readme: string, repoName: string): string[] {
@@ -169,8 +192,8 @@ async function main() {
   console.log(`Found ${ownRepos.length} own repos, ${contributedRepos.length} contributed repos.\n`);
 
   const allRepos = [
-    ...ownRepos.filter((r) => !r.fork),
-    ...contributedRepos,
+    ...ownRepos.filter((r) => !r.fork), // exclude your own forks of others' work
+    ...contributedRepos,                 // always include repos you contributed to
   ];
 
   const newRepos = allRepos.filter(
