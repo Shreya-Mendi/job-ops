@@ -146,16 +146,6 @@ const MASTER = {
       ],
     },
     {
-      key: "Paper Trail",
-      name: "Paper Trail",
-      subtitle: "Epstein Case Public-Docs NLP System",
-      tech: "FastAPI · RAG · NER · Consequence Classification · Timeline UI",
-      date: "2026",
-      bullets: [
-        "Built an NLP pipeline to classify legal consequences for individuals using public documents; includes RAG-based chatbot, NER, and multi-tier consequence classification with an interactive timeline UI.",
-      ],
-    },
-    {
       key: "Sourcing Happiness",
       name: "Sourcing Happiness",
       subtitle: "World Happiness Report Analysis",
@@ -292,7 +282,6 @@ PROJECTS:
 • Alba: [1] "Shipped a privacy-first Chrome extension computing LLM energy, carbon, and water footprints client-side using emissions heuristics; included prompt optimization suggestions and a daily sustainability dashboard."
 • Wordle XAI Bot: [1] "Built a multimodal agent that plays Wordle using vision + NLP models, surfacing token-level saliency to explain decisions in real time." [2] "Integrated Grad-CAM style explainability to trace errors and visualize transparent human–AI interactions."
 • Supreme Court: [1] "Modeled ~13K Supreme Court cases with Random Forest; used PDP/ICE/ALE to explain predictive drivers of judicial outcomes." [2] "Improved F1-score by ~15% and achieved ~70% accuracy on held-out case outcome prediction."
-• Paper Trail: [1] "Built an NLP pipeline to classify legal consequences for individuals using public documents; includes RAG-based chatbot, NER, and multi-tier consequence classification with an interactive timeline UI."
 • Sourcing Happiness: [1] "Analyzed World Happiness Report data (2019–2024) to study regional/country trends; built animated and comparative visualizations."
 
 WORK EXPERIENCE:
@@ -328,11 +317,13 @@ STEP 2 — Build the JSON fields:
 3. "experienceOverrides": Rewrite ALL bullets for BOTH roles per the rules. Keys must be "DevOps Engineer" and "Software Development Intern".
 
 4. "tailoredObjective": 1-2 sentences using 6-8 exact keyword phrases from the JD. STRICT rules:
-   - Must start with: "MEng AI student at Duke University" or "[Role from JD] with MEng in AI from Duke University"
-   - Never say "Masters in Computer Science" or any degree/field other than "MEng in Artificial Intelligence" / "MEng AI"
-   - Never use JD keywords as adjectives modifying the candidate (e.g. NEVER "Highly agentic engineer" — instead say "experienced in agentic AI systems")
-   - Structure: "[Role/identity] with [real background], experienced in [JD keyword 1], [JD keyword 2], and [JD keyword 3], applying [JD keyword 4] to [JD keyword 5]."
-   - Only reference skills/tools that exist in the candidate background above — no invented claims
+   - Must start with: "MEng AI student at Duke University" or "[Role from JD] with MEng in Artificial Intelligence from Duke University"
+   - Degree is ALWAYS "MEng in Artificial Intelligence" — NEVER "Masters in Computer Science", "MS", "PhD", or any other degree
+   - NEVER use JD keywords as adjectives modifying the candidate (e.g. NEVER "Highly agentic engineer" or "HIPAA-certified developer" — instead say "experienced in agentic AI" or "familiar with HIPAA-compliant systems")
+   - NEVER claim experience with industries, certifications, or domains NOT in the candidate background: no HIPAA, no healthcare, no finance, no legal, no SOC2, no FedRAMP, no voice/speech/transcription models, no robotics, no embedded systems — unless those exact terms appear in the skills pool above
+   - NEVER invent tools, frameworks, or methods not in the skills pool
+   - Structure: "[Role/identity], experienced in [JD keyword 1], [JD keyword 2], and [JD keyword 3], applying [JD keyword 4] to [JD keyword 5 — must be a real domain from skills pool]."
+   - When in doubt, omit the claim — a shorter factual objective is better than a longer hallucinated one
 
 5. "coursework": 5-7 courses most relevant to JD.
 
