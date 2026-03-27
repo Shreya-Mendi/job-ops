@@ -388,13 +388,22 @@ WORK EXPERIENCE:
 ━━━ COURSEWORK OPTIONS ━━━
 Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Vision, Explainable AI, Alternative Data, AI Security
 
+━━━ FORBIDDEN DOMAINS — NEVER introduce these into any bullet, objective, or skill unless the exact term already appears in the original bullet text above ━━━
+Healthcare & compliance: HIPAA, EHR, EMR, HL7, FHIR, PHI, clinical, patient data, medical records, healthcare software, telehealth, health tech
+Defense & government: ITAR, DoD, FISMA, FedRAMP, classified, defense, military, munitions, national security, clearance
+Finance & legal: SOC2, PCI-DSS, SEC, FINRA, trading, hedge fund, legal discovery, court, litigation
+Voice & speech: voice models, speech recognition, transcription, ASR, TTS, speaker diarization, audio processing
+Robotics & hardware: ROS, embedded systems, RTOS, firmware, FPGA, microcontroller, actuator, sensor fusion
+If the JD is from one of these domains, you may match the company's general AI/ML/software keywords — but do NOT adopt domain-specific terminology as if the candidate has worked in that domain.
+
 ━━━ REWRITING RULES — FOLLOW STRICTLY ━━━
 1. STAR structure: reframe each bullet as Action → Method/Tool → Result where the original supports it
 2. Substitute words with JD keyword equivalents where meaning is the same (e.g. "NLP" → "natural language processing" if JD uses that phrase; "agent" → "agentic AI" if JD uses that; "data preprocessing" → "data cleaning" etc.)
 3. NEVER change, round, or omit any number, percentage, or metric — copy them exactly from the originals above (e.g. "25%", "0.67–1.69% MAPE", "38%", "99%+", "~13K", "~15%", "~70%")
-4. NEVER add a tool, technology, or claim that is not in the original bullet
+4. NEVER add a tool, technology, claim, or domain-specific term that is not in the original bullet
 5. NEVER merge two bullets into one or split one into two — output the same count as input
 6. Each rewritten bullet must describe the same work as the original
+7. Apply the FORBIDDEN DOMAINS list — if a JD keyword is in a forbidden domain and not in the original bullet, skip it
 
 ━━━ OUTPUT STEPS ━━━
 
@@ -412,7 +421,7 @@ STEP 2 — Build the JSON fields:
    - Must start with: "MEng AI student at Duke University" or "[Role from JD] with MEng in Artificial Intelligence from Duke University"
    - Degree is ALWAYS "MEng in Artificial Intelligence" — NEVER "Masters in Computer Science", "MS", "PhD", or any other degree
    - NEVER use JD keywords as adjectives modifying the candidate (e.g. NEVER "Highly agentic engineer" or "HIPAA-certified developer" — instead say "experienced in agentic AI" or "familiar with HIPAA-compliant systems")
-   - NEVER claim experience with industries, certifications, or domains NOT in the candidate background: no HIPAA, no healthcare, no finance, no legal, no SOC2, no FedRAMP, no voice/speech/transcription models, no robotics, no embedded systems — unless those exact terms appear in the skills pool above
+   - NEVER reference any term from the FORBIDDEN DOMAINS list above — this applies even if the company is in healthcare, defense, finance, or other sensitive sectors
    - NEVER invent tools, frameworks, or methods not in the skills pool
    - Structure: "[Role/identity], experienced in [JD keyword 1], [JD keyword 2], and [JD keyword 3], applying [JD keyword 4] to [JD keyword 5 — must be a real domain from skills pool]."
    - When in doubt, omit the claim — a shorter factual objective is better than a longer hallucinated one
