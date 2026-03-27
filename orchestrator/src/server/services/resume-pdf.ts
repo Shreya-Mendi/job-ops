@@ -201,6 +201,98 @@ const MASTER = {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SKILLS POOL  (flat list per category for post-processing)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SKILLS_POOL: Array<{ category: string; items: string[] }> = [
+  {
+    category: "ML/AI",
+    items: MASTER.skillCategories["ML/AI"].split(",").map((s) => s.trim()),
+  },
+  {
+    category: "Frameworks & Tools",
+    items: MASTER.skillCategories["Frameworks & Tools"].split(",").map((s) => s.trim()),
+  },
+  {
+    category: "Cloud & DevOps",
+    items: MASTER.skillCategories["Cloud & DevOps"].split(",").map((s) => s.trim()),
+  },
+];
+
+/**
+ * Deterministic keyword enforcement: after the LLM returns its skills selection,
+ * scan the JD for any skill from the pool that matches but wasn't included in the
+ * LLM output. Force-prepend missing matches to the front of the relevant category.
+ *
+ * This guarantees ATS keyword coverage regardless of LLM compliance.
+ */
+function enforceKeywordCoverage(
+  selection: ResumeSelection,
+  jobDescription: string,
+): ResumeSelection {
+  const jdLower = jobDescription.toLowerCase();
+
+  // Build a lookup: normalised skill → category
+  const skillToCategory = new Map<string, string>();
+  for (const cat of SKILLS_POOL) {
+    for (const item of cat.items) {
+      // Index by lowercase, and also by each word in multi-word skills
+      skillToCategory.set(item.toLowerCase(), cat.category);
+      // e.g. "Explainable AI (XAI)" → also index "xai"
+      const parens = item.match(/\(([^)]+)\)/);
+      if (parens) skillToCategory.set(parens[1].toLowerCase(), cat.category);
+    }
+  }
+
+  // Find all pool skills mentioned in the JD
+  const jdMatchedSkills = new Map<string, string>(); // skill → category
+  for (const cat of SKILLS_POOL) {
+    for (const item of cat.items) {
+      const bare = item.replace(/\s*\([^)]*\)/, "").trim(); // strip "(XAI)" etc.
+      if (jdLower.includes(bare.toLowerCase())) {
+        jdMatchedSkills.set(item, cat.category);
+      }
+      // also check parenthesised abbreviation
+      const parens = item.match(/\(([^)]+)\)/);
+      if (parens && jdLower.includes(parens[1].toLowerCase())) {
+        jdMatchedSkills.set(item, cat.category);
+      }
+    }
+  }
+
+  if (jdMatchedSkills.size === 0) return selection;
+
+  // For each category in the selection, check which JD-matched skills are absent
+  const updatedSkills = selection.skills.map((skillGroup) => {
+    const itemsLower = skillGroup.items.toLowerCase();
+    const missing: string[] = [];
+
+    for (const [skill, cat] of jdMatchedSkills) {
+      if (cat !== skillGroup.category) continue;
+      const bare = skill.replace(/\s*\([^)]*\)/, "").trim();
+      if (!itemsLower.includes(bare.toLowerCase())) {
+        missing.push(skill);
+      }
+    }
+
+    if (missing.length === 0) return skillGroup;
+
+    // Prepend missing skills to front of this category
+    const existing = skillGroup.items.split(",").map((s) => s.trim()).filter(Boolean);
+    const merged = [...missing, ...existing.filter(
+      (e) => !missing.some((m) => m.toLowerCase() === e.toLowerCase()),
+    )];
+    logger.info("Keyword enforcement: prepended missing JD skills", {
+      category: skillGroup.category,
+      added: missing,
+    });
+    return { ...skillGroup, items: merged.join(", ") };
+  });
+
+  return { ...selection, skills: updatedSkills };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // LLM SELECTION SCHEMA  (simple — just project names, coursework, skill order)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -919,6 +1011,9 @@ export async function generateResumePdf(
           selection.skills = DEFAULT_SELECTION.skills;
         }
       }
+
+      // Deterministic keyword enforcement — guarantees JD-matched skills appear
+      selection = enforceKeywordCoverage(selection, jobDescription);
 
       html = buildResumeHtmlFromData(selection);
     }
