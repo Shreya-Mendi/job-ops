@@ -177,6 +177,50 @@ const MASTER = {
         "Implemented Q-table reinforcement learning for execution strategy and an immutable audit trail for agent accountability and compliance logging.",
       ],
     },
+    {
+      key: "PoolCue-Assist",
+      name: "PoolCue-Assist",
+      subtitle: "Real-Time Billiards Stroke Analyzer",
+      tech: "Raspberry Pi · IMU · Scikit-learn · Embedded Systems · Python",
+      date: "2026",
+      bullets: [
+        "Designed a wearable IMU system on a Raspberry Pi 4 using an MPU6050 sensor to classify billiards strokes as GOOD/BAD via a Decision Tree classifier; achieved perfect F1 score (1.000) across 5-fold cross-validation with ~100 Hz inference and <1s feedback latency.",
+        "Identified 129–246x rotational variance separation between good and bad strokes; delivered real-time feedback via LCD, RGB LEDs, and audio — no coach required.",
+      ],
+    },
+    {
+      key: "Contextual Boost LLMs",
+      name: "Contextual Boost LLMs",
+      subtitle: "Statistical Study on Role-Conditioned LLM Reasoning",
+      tech: "Python · OpenAI API · Statistical Analysis · Prompt Engineering",
+      date: "2025",
+      bullets: [
+        "Investigated role-conditioned prompting on graduate-level STEM questions using the OpenAI API; identified domain-specific accuracy shifts (Physics +3pp) and validated statistical significance using McNemar's exact test, Wilcoxon signed-rank, and paired t-tests (p=0.65 overall).",
+        "Contributed statistical analysis pipeline and domain-level reasoning breakdown across Physics, Astrophysics, and Chemistry for a collaborative LLM prompt engineering study.",
+      ],
+    },
+    {
+      key: "MindGuard",
+      name: "MindGuard",
+      subtitle: "AI Safety Benchmark for Mental Health Crisis Response",
+      tech: "Python · AI Safety · Benchmark Design · NLP",
+      date: "2026",
+      bullets: [
+        "Developed a benchmark of 1,200 expert-annotated synthetic prompts across 5 clinically-validated severity tiers to evaluate AI model safety calibration in mental health crisis scenarios; achieved Fleiss' Kappa >0.8 inter-rater reliability.",
+        "Designed a composite safety score weighting Calibration Accuracy (40%), Critical Miss Rate (40%), Consistency (10%), and Over-Escalation Rate (10%); benchmarked GPT-4 (0.847) against a human counselor baseline (0.961).",
+      ],
+    },
+    {
+      key: "SemanticJury",
+      name: "SemanticJury",
+      subtitle: "Semantic Search Engine for Legal Research",
+      tech: "Python · Sentence Transformers · ChromaDB · RAG · Gradio",
+      date: "2025",
+      bullets: [
+        "Built a semantic search engine for legal research using sentence-transformers (all-MiniLM-L6-v2) and ChromaDB vector database, enabling natural language queries over case law with citation network discovery.",
+        "Deployed a Gradio UI supporting retrieval-augmented search across landmark Supreme Court cases; implemented semantic embeddings and vector similarity search for legal information retrieval.",
+      ],
+    },
   ],
 
   experience: [
@@ -399,6 +443,10 @@ PROJECTS:
 • Sourcing Happiness: [1] "Analyzed World Happiness Report data (2019–2024) to study regional/country trends; built animated and comparative visualizations."
 • QuietSky: [1] "Built a speech-practice game with four gameplay modes using Whisper and VOSK ASR for real-time transcription; evaluated speech continuity, rhythm, and effort without penalizing disfluencies." [2] "Developed a FastAPI backend with Web Audio API and ffmpeg for audio capture and processing, integrating automatic speech recognition into a full-stack React + Vite application."
 • Tradecraft: [1] "Orchestrated five specialized AI agents (Macro Researcher, Alpha Signal Designer, Risk Manager, Execution Agent, Compliance Supervisor) using GPT-4o, Claude, and Llama via GitHub Models for coordinated investment decisions." [2] "Implemented Q-table reinforcement learning for execution strategy and an immutable audit trail for agent accountability and compliance logging."
+• PoolCue-Assist: [1] "Designed a wearable IMU system on a Raspberry Pi 4 using an MPU6050 sensor to classify billiards strokes as GOOD/BAD via a Decision Tree classifier; achieved perfect F1 score (1.000) across 5-fold cross-validation with ~100 Hz inference and <1s feedback latency." [2] "Identified 129–246x rotational variance separation between good and bad strokes; delivered real-time feedback via LCD, RGB LEDs, and audio — no coach required."
+• Contextual Boost LLMs: [1] "Investigated role-conditioned prompting on graduate-level STEM questions using the OpenAI API; identified domain-specific accuracy shifts (Physics +3pp) and validated statistical significance using McNemar's exact test, Wilcoxon signed-rank, and paired t-tests (p=0.65 overall)." [2] "Contributed statistical analysis pipeline and domain-level reasoning breakdown across Physics, Astrophysics, and Chemistry for a collaborative LLM prompt engineering study."
+• MindGuard: [1] "Developed a benchmark of 1,200 expert-annotated synthetic prompts across 5 clinically-validated severity tiers to evaluate AI model safety calibration in mental health crisis scenarios; achieved Fleiss' Kappa >0.8 inter-rater reliability." [2] "Designed a composite safety score weighting Calibration Accuracy (40%), Critical Miss Rate (40%), Consistency (10%), and Over-Escalation Rate (10%); benchmarked GPT-4 (0.847) against a human counselor baseline (0.961)."
+• SemanticJury: [1] "Built a semantic search engine for legal research using sentence-transformers (all-MiniLM-L6-v2) and ChromaDB vector database, enabling natural language queries over case law with citation network discovery." [2] "Deployed a Gradio UI supporting retrieval-augmented search across landmark Supreme Court cases; implemented semantic embeddings and vector similarity search for legal information retrieval."
 
 WORK EXPERIENCE:
 • DevOps Engineer: [1] "Architected and optimized AWS/Hetzner infrastructure and CI/CD pipelines (Docker, Kubernetes), reducing operational costs by 38% while improving reliability and uptime." [2] "Engineered automated rollout/rollback policies to reduce deployment risk and improve mean time to recovery (MTTR) across production environments." [3] "Managed containerized microservices for a blockchain-based platform, maintaining 99%+ availability across distributed nodes; improved security posture across cloud resources."

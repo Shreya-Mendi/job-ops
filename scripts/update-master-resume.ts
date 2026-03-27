@@ -170,15 +170,33 @@ function extractBullets(readme: string, repoName: string): string[] {
 const ALREADY_IN_MASTER = new Set([
   "when2speak",
   "uav-sar",
+  "computer-vision-project", // UAV-SAR in teammate's repo
   "bmw-capstone",
+  "bmw-optimizer",
   "inflationship",
   "ai-audit",
+  "aiaudit",
   "alba",
   "wordle-xai-bot",
+  "wordle-xai",
   "supreme-court",
+  "supremecourtml",
   "sourcing-happiness",
+  "sourcing-happiness",
+  "sourcinghappiness",
   "quietsky",
   "tradecraft",
+  "poolcue-assist",
+  "poolcueassist",
+  "contextual-boost-llms",
+  "contextualboostllms",
+  "contextual_boost_llms",
+  "mindguard",
+  "mindguard-benchmark",
+  "mindguardbenchmark",
+  "semanticjury",
+  "epstein-paper-trail",
+  "epstein-accountability-index",
 ]);
 
 async function main() {
