@@ -265,9 +265,9 @@ const MASTER = {
   ],
 
   skillCategories: {
-    "ML/AI": "Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Agentic AI, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing, Optimization, Data Collection, Data Cleaning, Exploratory Data Analysis",
-    "Frameworks & Tools": "Python, PyTorch, TensorFlow, Scikit-learn, NumPy, Pandas, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash",
-    "Cloud & DevOps": "AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana",
+    "ML/AI": "Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Agentic AI, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing, Optimization, Statistical Analysis, Data Collection, Data Cleaning, Data Ingestion, Data Pipelines, Exploratory Data Analysis, Data Visualization, Outlier Detection, AI-Assisted Analysis, Predictive Modeling",
+    "Frameworks & Tools": "Python, PyTorch, TensorFlow, Scikit-learn, NumPy, Pandas, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash, Jupyter Notebooks",
+    "Cloud & DevOps": "AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana, Monitoring, Automated Alerts",
   } as Record<string, string>,
 };
 
@@ -297,6 +297,55 @@ const SKILLS_POOL: Array<{ category: string; items: string[] }> = [
  *
  * This guarantees ATS keyword coverage regardless of LLM compliance.
  */
+// JD terms that don't exactly match a pool skill but are synonymous.
+// key = JD phrase (lowercase), value = exact pool skill name to inject.
+const SKILL_ALIASES: Record<string, string> = {
+  "statistical methods": "Statistical Analysis",
+  "statistical modeling": "Statistical Analysis",
+  "statistical techniques": "Statistical Analysis",
+  "statistics": "Statistical Analysis",
+  "data analysis": "Exploratory Data Analysis",
+  "data analytics": "Exploratory Data Analysis",
+  "eda": "Exploratory Data Analysis",
+  "exploratory analysis": "Exploratory Data Analysis",
+  "data viz": "Data Visualization",
+  "visualization": "Data Visualization",
+  "dashboards": "Data Visualization",
+  "dashboard": "Data Visualization",
+  "anomaly detection": "Outlier Detection",
+  "anomaly": "Outlier Detection",
+  "monitoring": "Monitoring",
+  "alerting": "Automated Alerts",
+  "alerts": "Automated Alerts",
+  "data pipeline": "Data Pipelines",
+  "etl": "Data Pipelines",
+  "data ingestion": "Data Ingestion",
+  "ingestion": "Data Ingestion",
+  "ai-assisted": "AI-Assisted Analysis",
+  "ai assisted": "AI-Assisted Analysis",
+  "predictive": "Predictive Modeling",
+  "forecasting": "Time-Series Forecasting",
+  "jupyter": "Jupyter Notebooks",
+  "notebook": "Jupyter Notebooks",
+  "notebooks": "Jupyter Notebooks",
+};
+
+// Which category does each alias target?
+const ALIAS_CATEGORY: Record<string, string> = {
+  "Statistical Analysis": "ML/AI",
+  "Exploratory Data Analysis": "ML/AI",
+  "Data Visualization": "ML/AI",
+  "Outlier Detection": "ML/AI",
+  "Data Pipelines": "ML/AI",
+  "Data Ingestion": "ML/AI",
+  "AI-Assisted Analysis": "ML/AI",
+  "Predictive Modeling": "ML/AI",
+  "Time-Series Forecasting": "ML/AI",
+  "Monitoring": "Cloud & DevOps",
+  "Automated Alerts": "Cloud & DevOps",
+  "Jupyter Notebooks": "Frameworks & Tools",
+};
+
 function enforceKeywordCoverage(
   selection: ResumeSelection,
   jobDescription: string,
@@ -328,6 +377,14 @@ function enforceKeywordCoverage(
       if (parens && jdLower.includes(parens[1].toLowerCase())) {
         jdMatchedSkills.set(item, cat.category);
       }
+    }
+  }
+
+  // Check alias map: JD phrases that are synonyms of pool skills
+  for (const [jdPhrase, poolSkill] of Object.entries(SKILL_ALIASES)) {
+    if (jdLower.includes(jdPhrase)) {
+      const cat = ALIAS_CATEGORY[poolSkill];
+      if (cat) jdMatchedSkills.set(poolSkill, cat);
     }
   }
 
@@ -458,9 +515,9 @@ WORK EXPERIENCE:
 • Software Development Intern: [1] "Developed and deployed Dockerized services on Linux, automating deployments with Jenkins and shell scripting to reduce manual release effort across service teams." [2] "Integrated REST APIs in Python for infrastructure monitoring; expanded observability coverage with Grafana and Prometheus dashboards, improving system stability and reducing incident detection time." [3] "Streamlined CI/CD release processes across multiple service teams, accelerating deployment cycles and reducing release friction through pipeline standardization."
 
 ━━━ FULL SKILLS POOL (all items the candidate genuinely has) ━━━
-- ML/AI: Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Agentic AI, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing, Optimization, Data Collection, Data Cleaning, Exploratory Data Analysis
-- Frameworks & Tools: Python, PyTorch, TensorFlow, Scikit-learn, NumPy, Pandas, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash
-- Cloud & DevOps: AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana
+- ML/AI: Machine Learning, Deep Learning, NLP, Computer Vision, LLMs, Agentic AI, Reinforcement Learning, Transformer Models, Finetuning, Prompt Engineering, Time-Series Forecasting, Explainable AI (XAI), Model Evaluation, A/B Testing, Optimization, Statistical Analysis, Data Collection, Data Cleaning, Data Ingestion, Data Pipelines, Exploratory Data Analysis, Data Visualization, Outlier Detection, AI-Assisted Analysis, Predictive Modeling
+- Frameworks & Tools: Python, PyTorch, TensorFlow, Scikit-learn, NumPy, Pandas, HuggingFace, FastAPI, Flask, MLflow, Streamlit, SQL, Bash, Jupyter Notebooks
+- Cloud & DevOps: AWS, GCP (Cloud Run), Docker, Kubernetes, CI/CD, Git, Linux, Prometheus, Grafana, Monitoring, Automated Alerts
 
 ━━━ COURSEWORK OPTIONS ━━━
 Deep Learning, LLMs & Intelligent Agents, Reinforcement Learning, Computer Vision, Explainable AI, Alternative Data, AI Security, AI in the Physical World
