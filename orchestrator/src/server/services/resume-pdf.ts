@@ -40,7 +40,7 @@ const MASTER = {
   phone: "(919) 608-0547",
   email: "shreya.mendi@duke.edu",
   linkedin: "linkedin.com/in/shreya-mendi",
-  githubHref: "https://github.com/shreyamendi",
+  githubHref: "https://github.com/Shreya-Mendi",
   githubLabel: "GitHub",
   portfolioHref: "https://portfolio-website-five-theta-67.vercel.app/",
   portfolioLabel: "Portfolio",
@@ -940,7 +940,7 @@ Your job is to return complete, valid HTML for a customized single-page resume t
 2. Tailors projects and skills ordering to match the job description keywords
 3. Keeps ALL content factual — only include what is in the original resume, NO hallucination
 4. Must fit in exactly ONE page (A4) — do not add content, only reorder/select
-5. Include ALL links: email, LinkedIn, GitHub (https://github.com/shreyamendi), Portfolio (https://portfolio-website-five-theta-67.vercel.app/)
+5. Include ALL links: email, LinkedIn, GitHub (https://github.com/Shreya-Mendi), Portfolio (https://portfolio-website-five-theta-67.vercel.app/)
 6. The name "Shreya Mendi" must appear in large blue (#1a52a0) bold text centered at top
 7. Section headers must be in blue (#1a52a0) with a blue underline, uppercase
 8. Dates must be right-aligned italic
@@ -953,7 +953,7 @@ CONTACT INFO (hardcoded — use exactly):
 - Phone: (919) 608-0547
 - Email: shreya.mendi@duke.edu
 - LinkedIn: linkedin.com/in/shreya-mendi
-- GitHub: https://github.com/shreyamendi (display as "GitHub")
+- GitHub: https://github.com/Shreya-Mendi (display as "GitHub")
 - Portfolio: https://portfolio-website-five-theta-67.vercel.app/ (display as "Portfolio")
 
 SECTION ORDER: Education → Projects → Work Experience → Leadership → Skills
