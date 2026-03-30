@@ -529,6 +529,35 @@ Return JSON only — no explanation, no markdown fences:
 // HTML TEMPLATE RENDERER
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Words that should stay lowercase in title case
+const LOWER_WORDS = new Set(["a", "an", "and", "as", "at", "but", "by", "for",
+  "in", "nor", "of", "on", "or", "so", "the", "to", "up", "yet"]);
+
+function titleCaseSkill(s: string): string {
+  return s.replace(/[^,]+/g, (chunk) =>
+    chunk.trim().split(/\s+/).map((word, i) => {
+      const clean = word.toLowerCase();
+      // Preserve known acronyms / casing patterns
+      if (/^(llm|llms|nlp|api|apis|aws|gcp|sql|ai|ml|xai|rl|cv|gpu|cpu|ui|ux|ci\/cd|sar|imu|asr|ner|rag|tfidf|tqdm|rnn|cnn|kv|vit|bert|gpt|auc|roc|f1|mape|mttr)$/i.test(clean)) {
+        return clean.toUpperCase().replace("TF-IDF", "TF-IDF").replace("CI/CD", "CI/CD");
+      }
+      if (clean === "pytorch") return "PyTorch";
+      if (clean === "tensorflow") return "TensorFlow";
+      if (clean === "scikit-learn") return "Scikit-learn";
+      if (clean === "huggingface") return "HuggingFace";
+      if (clean === "fastapi") return "FastAPI";
+      if (clean === "mlflow") return "MLflow";
+      if (clean === "numpy") return "NumPy";
+      if (clean === "pandas") return "Pandas";
+      if (clean === "gradcam") return "Grad-CAM";
+      if (i === 0 || !LOWER_WORDS.has(clean)) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }
+      return clean;
+    }).join(" ")
+  );
+}
+
 function esc(s: unknown): string {
   const str =
     s == null ? ""
@@ -636,9 +665,10 @@ function buildResumeHtmlFromData(selection: ResumeSelection): string {
   const skillsMap = Object.fromEntries(
     (selection.skills ?? []).map((s) => [s.category, s.items])
   );
-  const skillsHtml = ["ML/AI", "Frameworks & Tools", "Cloud & DevOps"].map((cat) =>
-    `<div class="skill-line"><strong>${esc(cat)}:</strong> ${esc(skillsMap[cat] || MASTER.skillCategories[cat] || "")}</div>`
-  ).join("");
+  const skillsHtml = ["ML/AI", "Frameworks & Tools", "Cloud & DevOps"].map((cat) => {
+    const raw = skillsMap[cat] || MASTER.skillCategories[cat] || "";
+    return `<div class="skill-line"><strong>${esc(cat)}:</strong> ${esc(titleCaseSkill(raw))}</div>`;
+  }).join("");
 
   // ── Section helper ────────────────────────────────────────────────────────
   const section = (title: string, content: string) => `
@@ -823,17 +853,12 @@ async function htmlToPdf(html: string, outputPath: string): Promise<void> {
       return Math.max(body.scrollHeight, body.offsetHeight, html.scrollHeight, html.offsetHeight);
     });
 
+    // Use Puppeteer's native scale option so content shrinks uniformly
+    // rather than clipping with overflow:hidden
     const A4_HEIGHT_PX = 1123;
-    if (bodyHeight > A4_HEIGHT_PX + 20) {
-      const scale = Math.max(0.6, A4_HEIGHT_PX / bodyHeight);
-      await page.addStyleTag({
-        content: `
-          html, body { height: ${A4_HEIGHT_PX}px !important; overflow: hidden !important; }
-          body { transform: scale(${scale.toFixed(3)}); transform-origin: top left !important;
-                 width: ${(100 / scale).toFixed(1)}% !important; }
-        `,
-      });
-    }
+    const pdfScale = bodyHeight > A4_HEIGHT_PX + 20
+      ? Math.max(0.5, A4_HEIGHT_PX / bodyHeight)
+      : 1;
 
     await page.pdf({
       path: outputPath,
@@ -841,6 +866,7 @@ async function htmlToPdf(html: string, outputPath: string): Promise<void> {
       printBackground: false,
       margin: { top: "0", right: "0", bottom: "0", left: "0" },
       pageRanges: "1",
+      scale: pdfScale,
     });
   } finally {
     await browser.close();
