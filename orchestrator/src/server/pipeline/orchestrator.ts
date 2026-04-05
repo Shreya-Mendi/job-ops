@@ -15,8 +15,11 @@ import { getDataDir } from "../config/dataDir";
 import * as jobsRepo from "../repositories/jobs";
 import * as pipelineRepo from "../repositories/pipeline";
 import { getSetting } from "../repositories/settings";
+import { generateCoverLetter } from "../services/cover-letter";
+import { hasMasterResume } from "../services/master-resume";
 import { generatePdf } from "../services/pdf";
 import { getProfile } from "../services/profile";
+import { generateResumePdf } from "../services/resume-pdf";
 import { pickProjectIdsForJob } from "../services/projectSelection";
 import {
   extractProjectsFromProfile,
@@ -35,10 +38,9 @@ import {
 } from "./steps";
 
 const DEFAULT_CONFIG: PipelineConfig = {
-  topN: 10,
-  minSuitabilityScore: 50,
-  // Keep Glassdoor opt-in via source picker/settings; do not enable by default.
-  sources: ["gradcracker", "indeed", "linkedin", "ukvisajobs"],
+  topN: 15,
+  minSuitabilityScore: 45,
+  sources: ["indeed", "linkedin", "glassdoor", "jobright"],
   outputDir: join(getDataDir(), "pdfs"),
   enableCrawling: true,
   enableScoring: true,
@@ -321,6 +323,8 @@ export async function summarizeJob(
 
 /**
  * Step 2: Generate PDF using current summary and project selection.
+ * Uses master-resume Puppeteer pipeline if a master resume is uploaded;
+ * falls back to Reactive Resume otherwise.
  */
 export async function generateFinalPdf(
   jobId: string,
@@ -339,25 +343,42 @@ export async function generateFinalPdf(
       // Mark as processing
       await jobsRepo.updateJob(job.id, { status: "processing" });
 
-      const pdfResult = await generatePdf(
-        job.id,
-        {
-          summary: job.tailoredSummary || "",
-          headline: job.tailoredHeadline || "",
-          skills: job.tailoredSkills ? JSON.parse(job.tailoredSkills) : [],
-        },
-        job.jobDescription || "",
-        undefined, // deprecated baseResumePath parameter
-        job.selectedProjectIds,
-        {
-          tracerLinksEnabled: job.tracerLinksEnabled,
-          requestOrigin: options?.requestOrigin ?? null,
-          tracerCompanyName: job.employer ?? null,
-        },
-      );
+      const useMasterResume = await hasMasterResume();
+      let pdfResult: { success: boolean; pdfPath?: string; error?: string };
+
+      if (useMasterResume) {
+        jobLogger.info("Using master-resume Puppeteer pipeline");
+        pdfResult = await generateResumePdf(
+          job.id,
+          {
+            summary: job.tailoredSummary || "",
+            headline: job.tailoredHeadline || "",
+            skills: job.tailoredSkills ? JSON.parse(job.tailoredSkills) : [],
+          },
+          job.jobDescription || "",
+          job.employer,
+        );
+      } else {
+        jobLogger.info("Using Reactive Resume pipeline");
+        pdfResult = await generatePdf(
+          job.id,
+          {
+            summary: job.tailoredSummary || "",
+            headline: job.tailoredHeadline || "",
+            skills: job.tailoredSkills ? JSON.parse(job.tailoredSkills) : [],
+          },
+          job.jobDescription || "",
+          undefined,
+          job.selectedProjectIds,
+          {
+            tracerLinksEnabled: job.tracerLinksEnabled,
+            requestOrigin: options?.requestOrigin ?? null,
+            tracerCompanyName: job.employer ?? null,
+          },
+        );
+      }
 
       if (!pdfResult.success) {
-        // Revert status if failed
         await jobsRepo.updateJob(job.id, { status: "discovered" });
         return { success: false, error: pdfResult.error };
       }
@@ -377,7 +398,56 @@ export async function generateFinalPdf(
 }
 
 /**
- * Process a single job (runs both steps in sequence).
+ * Step 3: Generate cover letter PDF for a job.
+ */
+export async function generateJobCoverLetter(
+  jobId: string,
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  return runWithRequestContext({ jobId }, async () => {
+    const jobLogger = logger.child({ jobId });
+    jobLogger.info("Generating cover letter");
+    try {
+      const job = await jobsRepo.getJobById(jobId);
+      if (!job) return { success: false, error: "Job not found" };
+
+      const useMasterResume = await hasMasterResume();
+      if (!useMasterResume) {
+        jobLogger.info("Skipping cover letter — no master resume uploaded");
+        return { success: true };
+      }
+
+      const result = await generateCoverLetter(
+        job.id,
+        job.title,
+        job.employer,
+        job.jobDescription || "",
+      );
+
+      if (!result.success) {
+        jobLogger.warn("Cover letter generation failed", { error: result.error });
+        return { success: false, error: result.error };
+      }
+
+      await jobsRepo.updateJob(job.id, {
+        coverLetterPath: result.pdfPath,
+        coverLetterText: result.coverLetterText,
+      });
+
+      return { success: true };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      jobLogger.error("Cover letter generation failed", error);
+      return { success: false, error: message };
+    }
+  });
+}
+
+/**
+ * Process a single job during pipeline run: only summarize + select projects.
+ * Resume PDF and cover letter are generated manually by the user per-job.
  */
 export async function processJob(
   jobId: string,
@@ -387,13 +457,45 @@ export async function processJob(
   error?: string;
 }> {
   try {
-    // Step 1: Summarize & Select Projects
+    // Only summarize & select projects — leave job at "discovered"
+    // Resume PDF + cover letter are triggered manually by the user
     const sumResult = await summarizeJob(jobId, options);
     if (!sumResult.success) return sumResult;
 
-    // Step 2: Generate PDF
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Manually trigger full processing (resume PDF + cover letter) for a single job.
+ * Called when the user explicitly chooses to generate materials and apply.
+ */
+export async function generateJobMaterials(
+  jobId: string,
+  options?: ProcessJobOptions,
+): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  try {
+    // Ensure summarization is done first
+    const sumResult = await summarizeJob(jobId, options);
+    if (!sumResult.success) return sumResult;
+
+    // Generate resume PDF (moves job to "ready")
     const pdfResult = await generateFinalPdf(jobId, options);
-    return pdfResult;
+    if (!pdfResult.success) return pdfResult;
+
+    // Generate cover letter (non-fatal)
+    const clResult = await generateJobCoverLetter(jobId);
+    if (!clResult.success) {
+      logger.warn("Cover letter generation failed (non-fatal)", { jobId, error: clResult.error });
+    }
+
+    return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     return { success: false, error: message };

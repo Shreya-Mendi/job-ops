@@ -42,6 +42,10 @@ export const OrchestratorPage: React.FC = () => {
     setSalaryFilter,
     sort,
     setSort,
+    jobTypeFilter,
+    setJobTypeFilter,
+    titleKeyword,
+    setTitleKeyword,
     resetFilters,
   } = useOrchestratorFilters();
 
@@ -151,6 +155,8 @@ export const OrchestratorPage: React.FC = () => {
     sponsorFilter,
     salaryFilter,
     sort,
+    titleKeyword,
+    jobTypeFilter,
   );
   const counts = useMemo(() => getJobCounts(jobs), [jobs]);
   const sourcesWithJobs = useMemo(() => getSourcesWithJobs(jobs), [jobs]);
@@ -368,6 +374,10 @@ export const OrchestratorPage: React.FC = () => {
             onSortChange={setSort}
             onResetFilters={resetFilters}
             filteredCount={activeJobs.length}
+            jobTypeFilter={jobTypeFilter}
+            onJobTypeFilterChange={setJobTypeFilter}
+            titleKeyword={titleKeyword}
+            onTitleKeywordChange={setTitleKeyword}
           />
 
           {/* List/Detail grid - directly under tabs, no extra section */}
@@ -380,9 +390,12 @@ export const OrchestratorPage: React.FC = () => {
               selectedJobId={selectedJobId}
               selectedJobIds={selectedJobIds}
               activeTab={activeTab}
+              sort={sort}
+              onSortChange={setSort}
               onSelectJob={handleSelectJob}
               onToggleSelectJob={toggleSelectJob}
               onToggleSelectAll={toggleSelectAll}
+              onMoveGroupToReady={(ids) => void runJobAction("move_to_ready", ids)}
             />
 
             {/* Inspector panel: visually subordinate to list */}

@@ -8,6 +8,17 @@ import type {
 } from "./constants";
 import { compareJobs, parseSalaryBounds } from "./utils";
 
+export function normalizeJobType(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const s = raw.toLowerCase();
+  if (s.includes("intern")) return "Internship";
+  if (s.includes("co-op") || s.includes("coop") || s.includes("co op")) return "Co-op";
+  if (s.includes("contract")) return "Contract";
+  if (s.includes("part")) return "Part-time";
+  if (s.includes("full")) return "Full-time";
+  return null;
+}
+
 const getSponsorCategory = (score: number | null): SponsorFilter => {
   if (score == null) return "unknown";
   if (score >= 95) return "confirmed";
@@ -22,6 +33,8 @@ export const useFilteredJobs = (
   sponsorFilter: SponsorFilter,
   salaryFilter: SalaryFilter,
   sort: JobSort,
+  titleKeyword: string,
+  jobTypeFilter = "all",
 ) =>
   useMemo(() => {
     let filtered = jobs.filter((job) => job.status !== "in_progress");
@@ -88,5 +101,20 @@ export const useFilteredJobs = (
       });
     }
 
+    if (jobTypeFilter !== "all") {
+      filtered = filtered.filter(
+        (job) => normalizeJobType(job.jobType) === jobTypeFilter,
+      );
+    }
+
+    const kw = titleKeyword.trim().toLowerCase();
+    if (kw) {
+      filtered = filtered.filter(
+        (job) =>
+          job.title?.toLowerCase().includes(kw) ||
+          job.employer?.toLowerCase().includes(kw),
+      );
+    }
+
     return [...filtered].sort((a, b) => compareJobs(a, b, sort));
-  }, [jobs, activeTab, sourceFilter, sponsorFilter, salaryFilter, sort]);
+  }, [jobs, activeTab, sourceFilter, sponsorFilter, salaryFilter, sort, titleKeyword, jobTypeFilter]);

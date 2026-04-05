@@ -123,3 +123,31 @@ export interface BackupInfo {
   size: number;
   createdAt: string;
 }
+
+export type PipelinePresetJobType =
+  | "internship"
+  | "co-op"
+  | "full-time"
+  | null;
+
+export interface PipelinePreset {
+  id: string;
+  name: string;
+  searchTerms: string[];
+  country: string;
+  cityLocations: string[];
+  topN: number;
+  minSuitabilityScore: number;
+  runBudget: number;
+  jobType: PipelinePresetJobType;
+  sources: ExtractorSourceId[];
+  scheduleEnabled: boolean;
+  scheduleHours: number[]; // UTC hours [0-23]
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type PipelinePresetInput = Omit<
+  PipelinePreset,
+  "id" | "createdAt" | "updatedAt"
+>;

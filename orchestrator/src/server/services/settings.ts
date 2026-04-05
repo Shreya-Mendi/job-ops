@@ -103,7 +103,9 @@ export async function getEffectiveSettings(): Promise<AppSettings> {
 
       if (key === "resumeProjects") {
         let catalog: AppSettings["profileProjects"] = [];
-        if (Object.keys(profile).length > 0) {
+        // Only attempt RxResume project extraction when an RxResume base resume is configured.
+        // When using master resume, the profile is in ResumeProfile format which is incompatible.
+        if (rxresumeBaseResumeId && Object.keys(profile).length > 0) {
           try {
             catalog = extractProjectsFromResume(profile).catalog;
           } catch (error) {

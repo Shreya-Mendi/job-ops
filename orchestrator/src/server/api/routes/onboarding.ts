@@ -3,6 +3,7 @@ import { logger } from "@infra/logger";
 import { isDemoMode } from "@server/config/demo";
 import { getSetting } from "@server/repositories/settings";
 import { LlmService } from "@server/services/llm/service";
+import { hasMasterResume } from "@server/services/master-resume";
 import {
   getResume,
   RxResumeAuthConfigError,
@@ -55,11 +56,16 @@ async function validateLlm(options: {
 }
 
 /**
- * Validate that a base resume is configured and accessible via Reactive Resume.
+ * Validate that a base resume is configured — master resume takes priority over RxResume.
  */
 async function validateResumeConfig(): Promise<ValidationResponse> {
   try {
-    // Check if rxresumeBaseResumeId is configured
+    // Master resume takes priority — if uploaded, no RxResume needed
+    if (await hasMasterResume()) {
+      return { valid: true, message: null };
+    }
+
+    // Fall back to RxResume
     const { resumeId: rxresumeBaseResumeId } =
       await getConfiguredRxResumeBaseResumeId();
 
@@ -67,7 +73,7 @@ async function validateResumeConfig(): Promise<ValidationResponse> {
       return {
         valid: false,
         message:
-          "No base resume selected. Please select a resume from your RxResume account in Settings.",
+          "No resume configured. Upload your master resume in Settings, or select a base resume from your RxResume account.",
       };
     }
 

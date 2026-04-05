@@ -162,6 +162,7 @@ function buildTailoringPrompt(
 
   return `
 You are an expert resume writer tailoring a profile for a specific job application.
+The resume must fit on ONE PAGE — every word counts. Be ruthlessly concise.
 You must return a JSON object with three fields: "headline", "summary", and "skills".
 
 JOB DESCRIPTION (JD):
@@ -176,18 +177,23 @@ INSTRUCTIONS:
    - CRITICAL: This is the #1 ATS factor.
    - It must match the Job Title from the JD exactly (e.g., if JD says "Senior React Dev", use "Senior React Dev").
    - If the JD title is very generic, you may add one specialty, but keep it matching the role.
+   - Maximum 8 words.
 
 2. "summary" (String):
-   - The Hook. This needs to mirror the company's "About You" / "What we're looking for" section.
-   - Keep it concise, warm, and confident.
-   - Do NOT invent experience.
-   - Use the profile to add context.
+   - Exactly 2-3 sentences. No more.
+   - Opens with years of experience and core expertise matching the JD.
+   - Mirrors the company's "What we're looking for" language directly.
+   - Include 1-2 quantified achievements (%, numbers, scale) drawn from the profile.
+   - Do NOT invent experience. Do NOT use filler phrases like "passionate about" or "results-driven".
+   - Target ~50 words total.
 
 3. "skills" (Array of Objects):
-   - Review my existing skills section structure.
+   - Maximum 4 skill categories.
+   - Maximum 6 keywords per category.
    - Keyword Stuffing: Swap synonyms to match the JD exactly (e.g. "TDD" -> "Unit Testing", "ReactJS" -> "React").
-   - Keep my original skill levels and categories, just rename/reorder keywords to prioritize JD terms.
-   - Return the full "items" array for the skills section, preserving the structure: { "name": "Frontend", "keywords": [...] }.
+   - Keep my original categories, just rename/reorder keywords to prioritize JD terms.
+   - Drop any skill category not relevant to this JD.
+   - Return the array preserving the structure: { "name": "Frontend", "keywords": [...] }.
 
 WRITING STYLE PREFERENCES:
 - Tone: ${writingStyle.tone}

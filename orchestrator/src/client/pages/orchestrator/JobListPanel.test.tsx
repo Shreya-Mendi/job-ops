@@ -1,7 +1,10 @@
 import { createJob } from "@shared/testing/factories.js";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import type { JobSort } from "./constants";
 import { JobListPanel } from "./JobListPanel";
+
+const defaultSort: JobSort = { key: "score", direction: "desc" };
 
 describe("JobListPanel", () => {
   it("shows a loading state when fetching jobs", () => {
@@ -13,6 +16,8 @@ describe("JobListPanel", () => {
         selectedJobId={null}
         selectedJobIds={new Set()}
         activeTab="ready"
+        sort={defaultSort}
+        onSortChange={vi.fn()}
         onSelectJob={vi.fn()}
         onToggleSelectJob={vi.fn()}
         onToggleSelectAll={vi.fn()}
@@ -31,6 +36,8 @@ describe("JobListPanel", () => {
         selectedJobId={null}
         selectedJobIds={new Set()}
         activeTab="ready"
+        sort={defaultSort}
+        onSortChange={vi.fn()}
         onSelectJob={vi.fn()}
         onToggleSelectJob={vi.fn()}
         onToggleSelectAll={vi.fn()}
@@ -64,6 +71,8 @@ describe("JobListPanel", () => {
         selectedJobId="job-1"
         selectedJobIds={new Set()}
         activeTab="ready"
+        sort={defaultSort}
+        onSortChange={vi.fn()}
         onSelectJob={onSelectJob}
         onToggleSelectJob={onToggleSelectJob}
         onToggleSelectAll={onToggleSelectAll}
@@ -94,6 +103,8 @@ describe("JobListPanel", () => {
         selectedJobId="job-1"
         selectedJobIds={new Set(["job-1"])}
         activeTab="ready"
+        sort={defaultSort}
+        onSortChange={vi.fn()}
         onSelectJob={vi.fn()}
         onToggleSelectJob={onToggleSelectJob}
         onToggleSelectAll={onToggleSelectAll}
@@ -117,6 +128,8 @@ describe("JobListPanel", () => {
         selectedJobId={null}
         selectedJobIds={new Set()}
         activeTab="ready"
+        sort={defaultSort}
+        onSortChange={vi.fn()}
         onSelectJob={vi.fn()}
         onToggleSelectJob={vi.fn()}
         onToggleSelectAll={vi.fn()}
@@ -135,6 +148,8 @@ describe("JobListPanel", () => {
         selectedJobId="job-1"
         selectedJobIds={new Set()}
         activeTab="ready"
+        sort={defaultSort}
+        onSortChange={vi.fn()}
         onSelectJob={vi.fn()}
         onToggleSelectJob={vi.fn()}
         onToggleSelectAll={vi.fn()}
@@ -153,6 +168,8 @@ describe("JobListPanel", () => {
         selectedJobId={null}
         selectedJobIds={new Set(["job-1"])}
         activeTab="ready"
+        sort={defaultSort}
+        onSortChange={vi.fn()}
         onSelectJob={vi.fn()}
         onToggleSelectJob={vi.fn()}
         onToggleSelectAll={vi.fn()}

@@ -20,7 +20,12 @@ export function buildHeaders(args: {
   };
 
   if (args.apiKey) {
-    headers.Authorization = `Bearer ${args.apiKey}`;
+    if (args.provider === "anthropic") {
+      headers["x-api-key"] = args.apiKey;
+      headers["anthropic-version"] = "2023-06-01";
+    } else {
+      headers.Authorization = `Bearer ${args.apiKey}`;
+    }
   }
 
   if (args.provider === "openrouter") {

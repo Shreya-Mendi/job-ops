@@ -49,6 +49,10 @@ const renderFilters = (
     onSortChange: vi.fn(),
     onResetFilters: vi.fn(),
     filteredCount: 5,
+    jobTypeFilter: "all",
+    onJobTypeFilterChange: vi.fn(),
+    titleKeyword: "",
+    onTitleKeywordChange: vi.fn(),
     ...overrides,
   };
 

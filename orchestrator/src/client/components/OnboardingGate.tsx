@@ -1,15 +1,6 @@
 import * as api from "@client/api";
-import { ReactiveResumeConfigPanel } from "@client/components/ReactiveResumeConfigPanel";
 import { useDemoInfo } from "@client/hooks/useDemoInfo";
-import { useRxResumeConfigState } from "@client/hooks/useRxResumeConfigState";
 import { useSettings } from "@client/hooks/useSettings";
-import {
-  getInitialRxResumeMode,
-  getRxResumeCredentialDrafts,
-  getRxResumeMissingCredentialLabels,
-  validateAndMaybePersistRxResumeMode,
-} from "@client/lib/rxresume-config";
-import { BaseResumeSelection } from "@client/pages/settings/components/BaseResumeSelection";
 import { SettingsInput } from "@client/pages/settings/components/SettingsInput";
 import {
   getLlmProviderConfig,
@@ -18,10 +9,10 @@ import {
   normalizeLlmProvider,
 } from "@client/pages/settings/utils";
 import type { UpdateSettingsInput } from "@shared/settings-schema.js";
-import type { RxResumeMode, ValidationResult } from "@shared/types.js";
+import type { ValidationResult } from "@shared/types.js";
 import { Check } from "lucide-react";
 import type React from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import {
@@ -39,6 +30,7 @@ import {
   FieldLabel,
   FieldTitle,
 } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
   Select,
@@ -48,20 +40,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 type ValidationState = ValidationResult & { checked: boolean };
-type TimestampedValidationState = ValidationState & { testedAt: number | null };
 
 type OnboardingFormData = {
   llmProvider: string;
   llmBaseUrl: string;
   llmApiKey: string;
-  rxresumeMode: RxResumeMode;
-  rxresumeEmail: string;
-  rxresumePassword: string;
-  rxresumeApiKey: string;
-  rxresumeBaseResumeId: string | null;
 };
 
 const EMPTY_VALIDATION_STATE: ValidationState = {
@@ -70,24 +57,16 @@ const EMPTY_VALIDATION_STATE: ValidationState = {
   checked: false,
 };
 
-const EMPTY_TIMESTAMPED_VALIDATION_STATE: TimestampedValidationState = {
-  ...EMPTY_VALIDATION_STATE,
-  testedAt: null,
-};
-
 function getStepPrimaryLabel(input: {
   currentStep: string | null;
   llmValidated: boolean;
-  rxresumeValidated: boolean;
-  baseResumeValidated: boolean;
+  resumeValidated: boolean;
 }): string {
   const toLabel = (isValidated: boolean): string =>
     isValidated ? "Revalidate" : "Validate";
 
   if (input.currentStep === "llm") return toLabel(input.llmValidated);
-  if (input.currentStep === "rxresume") return toLabel(input.rxresumeValidated);
-  if (input.currentStep === "baseresume")
-    return toLabel(input.baseResumeValidated);
+  if (input.currentStep === "resume") return toLabel(input.resumeValidated);
   return "Validate";
 }
 
@@ -97,35 +76,26 @@ export const OnboardingGate: React.FC = () => {
     isLoading: settingsLoading,
     refreshSettings,
   } = useSettings();
-  const {
-    storedRxResume,
-    getBaseResumeIdForMode,
-    setBaseResumeIdForMode,
-    syncBaseResumeIdsForMode,
-  } = useRxResumeConfigState(settings);
 
   const [isSavingEnv, setIsSavingEnv] = useState(false);
   const [isValidatingLlm, setIsValidatingLlm] = useState(false);
-  const [isValidatingRxresume, setIsValidatingRxresume] = useState(false);
-  const [isValidatingBaseResume, setIsValidatingBaseResume] = useState(false);
+  const [isValidatingResume, setIsValidatingResume] = useState(false);
   const [llmValidation, setLlmValidation] = useState<ValidationState>(
     EMPTY_VALIDATION_STATE,
   );
-  const [rxresumeValidation, setRxresumeValidation] = useState<ValidationState>(
+  const [resumeValidation, setResumeValidation] = useState<ValidationState>(
     EMPTY_VALIDATION_STATE,
   );
-  const [rxresumeVersionValidations, setRxresumeVersionValidations] = useState<{
-    v4: TimestampedValidationState;
-    v5: TimestampedValidationState;
-  }>({
-    v4: EMPTY_TIMESTAMPED_VALIDATION_STATE,
-    v5: EMPTY_TIMESTAMPED_VALIDATION_STATE,
-  });
-  const [baseResumeValidation, setBaseResumeValidation] =
-    useState<ValidationState>(EMPTY_VALIDATION_STATE);
   const [currentStep, setCurrentStep] = useState<string | null>(null);
   const demoInfo = useDemoInfo();
   const demoMode = demoInfo?.demoMode ?? false;
+
+  // Master resume inline state
+  const [masterResumeText, setMasterResumeText] = useState("");
+  const [masterResumeExists, setMasterResumeExists] = useState(false);
+  const [isSavingResume, setIsSavingResume] = useState(false);
+  const [isFetchingResume, setIsFetchingResume] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const { control, watch, getValues, reset, setValue } =
     useForm<OnboardingFormData>({
@@ -133,68 +103,11 @@ export const OnboardingGate: React.FC = () => {
         llmProvider: "",
         llmBaseUrl: "",
         llmApiKey: "",
-        rxresumeMode: "v5",
-        rxresumeEmail: "",
-        rxresumePassword: "",
-        rxresumeApiKey: "",
-        rxresumeBaseResumeId: null,
       },
     });
 
   const llmProvider = watch("llmProvider");
 
-  const validateLlm = useCallback(async () => {
-    const values = getValues();
-    const selectedProvider = normalizeLlmProvider(
-      values.llmProvider || settings?.llmProvider?.value || "openrouter",
-    );
-    const providerConfig = getLlmProviderConfig(selectedProvider);
-    const { requiresApiKey, showBaseUrl } = providerConfig;
-
-    setIsValidatingLlm(true);
-    try {
-      const result = await api.validateLlm({
-        provider: selectedProvider,
-        baseUrl: showBaseUrl
-          ? values.llmBaseUrl.trim() || undefined
-          : undefined,
-        apiKey: requiresApiKey
-          ? values.llmApiKey.trim() || undefined
-          : undefined,
-      });
-      setLlmValidation({ ...result, checked: true });
-      return result;
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "LLM validation failed";
-      const result = { valid: false, message };
-      setLlmValidation({ ...result, checked: true });
-      return result;
-    } finally {
-      setIsValidatingLlm(false);
-    }
-  }, [getValues, settings?.llmProvider]);
-
-  const validateBaseResume = useCallback(async () => {
-    setIsValidatingBaseResume(true);
-    try {
-      const result = await api.validateResumeConfig();
-      setBaseResumeValidation({ ...result, checked: true });
-      return result;
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Base resume validation failed";
-      const result = { valid: false, message };
-      setBaseResumeValidation({ ...result, checked: true });
-      return result;
-    } finally {
-      setIsValidatingBaseResume(false);
-    }
-  }, []);
-
-  const rxresumeModeValue = watch("rxresumeMode");
   const selectedProvider = normalizeLlmProvider(
     llmProvider || settings?.llmProvider?.value || "openrouter",
   );
@@ -208,97 +121,67 @@ export const OnboardingGate: React.FC = () => {
 
   const llmKeyHint = settings?.llmApiKeyHint ?? null;
   const hasLlmKey = Boolean(llmKeyHint);
-  const rxresumeModeCurrent = (rxresumeModeValue ||
-    settings?.rxresumeMode?.value ||
-    "v5") as RxResumeMode;
-  const hasCheckedValidations =
-    (requiresLlmKey ? llmValidation.checked : true) &&
-    rxresumeValidation.checked &&
-    baseResumeValidation.checked;
+
+  const validateLlm = useCallback(async () => {
+    const values = getValues();
+    const provCfg = getLlmProviderConfig(
+      normalizeLlmProvider(values.llmProvider || settings?.llmProvider?.value || "openrouter"),
+    );
+
+    setIsValidatingLlm(true);
+    try {
+      const result = await api.validateLlm({
+        provider: normalizeLlmProvider(values.llmProvider || settings?.llmProvider?.value || "openrouter"),
+        baseUrl: provCfg.showBaseUrl ? values.llmBaseUrl.trim() || undefined : undefined,
+        apiKey: provCfg.requiresApiKey ? values.llmApiKey.trim() || undefined : undefined,
+      });
+      setLlmValidation({ ...result, checked: true });
+      return result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "LLM validation failed";
+      const result = { valid: false, message };
+      setLlmValidation({ ...result, checked: true });
+      return result;
+    } finally {
+      setIsValidatingLlm(false);
+    }
+  }, [getValues, settings?.llmProvider]);
+
+  const validateResume = useCallback(async () => {
+    setIsValidatingResume(true);
+    try {
+      const result = await api.validateResumeConfig();
+      setResumeValidation({ ...result, checked: true });
+      return result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Resume validation failed";
+      const result = { valid: false, message };
+      setResumeValidation({ ...result, checked: true });
+      return result;
+    } finally {
+      setIsValidatingResume(false);
+    }
+  }, []);
+
   const llmValidated = requiresLlmKey ? llmValidation.valid : true;
+  const hasCheckedValidations =
+    (requiresLlmKey ? llmValidation.checked : true) && resumeValidation.checked;
   const shouldOpen =
     !demoMode &&
     Boolean(settings && !settingsLoading) &&
     hasCheckedValidations &&
-    !(llmValidated && rxresumeValidation.valid && baseResumeValidation.valid);
+    !(llmValidated && resumeValidation.valid);
 
-  const validateRxresumeVersion = useCallback(
-    async (
-      version: "v4" | "v5",
-    ): Promise<ValidationResult & { checked: true; testedAt: number }> => {
-      const values = getValues();
-      const draftCredentials = getRxResumeCredentialDrafts(values);
-      const testedAt = Date.now();
-      const result = await validateAndMaybePersistRxResumeMode({
-        mode: version,
-        stored: storedRxResume,
-        draft: draftCredentials,
-        validate: api.validateRxresume,
-        getPrecheckMessage: (failure) =>
-          failure === "missing-v5-api-key"
-            ? "v5 API key required. Add a v5 API key, then test again."
-            : "v4 email and password required. Add both credentials, then test again.",
-        getValidationErrorMessage: (error, mode) =>
-          error instanceof Error
-            ? error.message
-            : `RxResume ${mode} validation failed`,
-      });
-      return { ...result.validation, checked: true, testedAt };
-    },
-    [getValues, storedRxResume],
-  );
-
-  const validateRxresume = useCallback(async () => {
-    const values = getValues();
-    const selectedMode = values.rxresumeMode;
-
-    setIsValidatingRxresume(true);
-    try {
-      const versionResult = await validateRxresumeVersion(selectedMode);
-      setRxresumeVersionValidations((current) => ({
-        ...current,
-        [selectedMode]: versionResult,
-      }));
-
-      const result: ValidationResult = {
-        valid: versionResult.valid,
-        message: versionResult.message,
-      };
-      setRxresumeValidation({ ...result, checked: true });
-      return result;
-    } finally {
-      setIsValidatingRxresume(false);
-    }
-  }, [getValues, validateRxresumeVersion]);
-
-  // Initialize form values from settings
+  // Initialize form from settings
   useEffect(() => {
     if (settings) {
-      const initialMode = getInitialRxResumeMode({
-        savedMode: (settings.rxresumeMode?.value ??
-          null) as RxResumeMode | null,
-        hasV4: storedRxResume.hasV4,
-        hasV5: storedRxResume.hasV5,
-      });
-      const selectedId = syncBaseResumeIdsForMode(initialMode);
       reset({
         llmProvider: settings.llmProvider?.value || "",
         llmBaseUrl: settings.llmBaseUrl?.value || "",
         llmApiKey: "",
-        rxresumeMode: initialMode,
-        rxresumeEmail: "",
-        rxresumePassword: "",
-        rxresumeApiKey: "",
-        rxresumeBaseResumeId: selectedId,
       });
     }
-  }, [
-    settings,
-    reset,
-    storedRxResume.hasV4,
-    storedRxResume.hasV5,
-    syncBaseResumeIdsForMode,
-  ]);
+  }, [settings, reset]);
 
   // Clear base URL when provider doesn't require it
   useEffect(() => {
@@ -313,6 +196,22 @@ export const OnboardingGate: React.FC = () => {
     setLlmValidation({ valid: false, message: null, checked: false });
   }, [selectedProvider]);
 
+  // Fetch master resume status when resume step is shown
+  useEffect(() => {
+    if (!shouldOpen) return;
+    setIsFetchingResume(true);
+    fetch("/api/profile/master-resume")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json?.data) {
+          setMasterResumeExists(json.data.exists);
+          setMasterResumeText(json.data.text || "");
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsFetchingResume(false));
+  }, [shouldOpen]);
+
   const steps = useMemo(
     () => [
       {
@@ -323,21 +222,14 @@ export const OnboardingGate: React.FC = () => {
         disabled: false,
       },
       {
-        id: "rxresume",
-        label: "Connect Reactive Resume",
-        subtitle: "Version + credentials",
-        complete: rxresumeValidation.valid,
+        id: "resume",
+        label: "Upload Resume",
+        subtitle: "Paste your resume text",
+        complete: resumeValidation.valid,
         disabled: false,
       },
-      {
-        id: "baseresume",
-        label: "Select Template Resume",
-        subtitle: "Template selection",
-        complete: baseResumeValidation.valid,
-        disabled: !rxresumeValidation.valid,
-      },
     ],
-    [llmValidated, rxresumeValidation.valid, baseResumeValidation.valid],
+    [llmValidated, resumeValidation.valid],
   );
 
   const defaultStep = steps.find((step) => !step.complete)?.id ?? steps[0]?.id;
@@ -351,39 +243,27 @@ export const OnboardingGate: React.FC = () => {
 
   const runAllValidations = useCallback(async () => {
     if (!settings) return;
-    const validations: Promise<ValidationResult>[] = [];
+    const promises: Promise<ValidationResult>[] = [];
     if (requiresLlmKey) {
-      validations.push(validateLlm());
+      promises.push(validateLlm());
     } else {
       setLlmValidation({ valid: true, message: null, checked: true });
     }
-    validations.push(validateRxresume(), validateBaseResume());
-
-    const results = await Promise.allSettled(validations);
-
-    const failed = results.find((result) => result.status === "rejected");
-    if (failed) {
-      const reason = failed.status === "rejected" ? failed.reason : null;
-      const message =
-        reason instanceof Error ? reason.message : "Validation checks failed";
+    promises.push(validateResume());
+    const results = await Promise.allSettled(promises);
+    const failed = results.find((r) => r.status === "rejected");
+    if (failed && failed.status === "rejected") {
+      const message = failed.reason instanceof Error ? failed.reason.message : "Validation failed";
       toast.error(message);
     }
-  }, [
-    settings,
-    requiresLlmKey,
-    validateLlm,
-    validateRxresume,
-    validateBaseResume,
-  ]);
+  }, [settings, requiresLlmKey, validateLlm, validateResume]);
 
-  // Run validations on mount when needed
+  // Run validations on mount
   useEffect(() => {
     if (demoMode) return;
     if (!settings || settingsLoading) return;
     const needsValidation =
-      (requiresLlmKey ? !llmValidation.checked : false) ||
-      !rxresumeValidation.checked ||
-      !baseResumeValidation.checked;
+      (requiresLlmKey ? !llmValidation.checked : false) || !resumeValidation.checked;
     if (!needsValidation) return;
     void runAllValidations();
   }, [
@@ -391,8 +271,7 @@ export const OnboardingGate: React.FC = () => {
     settingsLoading,
     requiresLlmKey,
     llmValidation.checked,
-    rxresumeValidation.checked,
-    baseResumeValidation.checked,
+    resumeValidation.checked,
     runAllValidations,
     demoMode,
   ]);
@@ -433,8 +312,7 @@ export const OnboardingGate: React.FC = () => {
       toast.success("LLM provider connected");
       return true;
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to save LLM settings";
+      const message = error instanceof Error ? error.message : "Failed to save LLM settings";
       toast.error(message);
       return false;
     } finally {
@@ -442,114 +320,36 @@ export const OnboardingGate: React.FC = () => {
     }
   };
 
-  const handleSaveRxresume = async (): Promise<boolean> => {
-    const values = getValues();
-    const modeValue = values.rxresumeMode;
-    const draftCredentials = getRxResumeCredentialDrafts(values);
-    const missing = getRxResumeMissingCredentialLabels({
-      mode: modeValue,
-      stored: storedRxResume,
-      draft: draftCredentials,
-    });
-
-    if (missing.length > 0) {
-      toast.info("Almost there", {
-        description: `Missing: ${missing.join(", ")}`,
-      });
+  const handleSaveMasterResume = async (): Promise<boolean> => {
+    const trimmed = masterResumeText.trim();
+    if (!trimmed || trimmed.length < 50) {
+      toast.error("Resume text must be at least 50 characters.");
       return false;
     }
-
+    setIsSavingResume(true);
     try {
-      setIsValidatingRxresume(true);
-      const result = await validateAndMaybePersistRxResumeMode({
-        mode: modeValue,
-        stored: storedRxResume,
-        draft: draftCredentials,
-        validate: api.validateRxresume,
-        persist: async (update) => {
-          setIsSavingEnv(true);
-          try {
-            await api.updateSettings(update);
-            await refreshSettings();
-          } finally {
-            setIsSavingEnv(false);
-          }
-        },
-        persistOnSuccess: true,
-        getPrecheckMessage: (failure) =>
-          failure === "missing-v5-api-key"
-            ? "v5 API key required. Add a v5 API key, then test again."
-            : "v4 email and password required. Add both credentials, then test again.",
-        getValidationErrorMessage: (error) =>
-          error instanceof Error ? error.message : "RxResume validation failed",
-        getPersistErrorMessage: (error) =>
-          error instanceof Error
-            ? error.message
-            : "Failed to save RxResume credentials",
+      const res = await fetch("/api/profile/master-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: trimmed }),
       });
-
-      setRxresumeVersionValidations((current) => ({
-        ...current,
-        [modeValue]: {
-          ...result.validation,
-          checked: true,
-          testedAt: Date.now(),
-        },
-      }));
-      setRxresumeValidation({ ...result.validation, checked: true });
-
-      if (!result.validation.valid) {
-        toast.error(result.validation.message || "RxResume validation failed");
-        return false;
+      const json = await res.json();
+      if (!res.ok || !json?.data?.saved) {
+        throw new Error(json?.error || "Save failed");
       }
-      setValue("rxresumePassword", "");
-      setValue("rxresumeApiKey", "");
-
-      toast.success("RxResume connected");
-      return true;
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to save RxResume credentials";
-      toast.error(message);
-      return false;
-    } finally {
-      setIsValidatingRxresume(false);
-      setIsSavingEnv(false);
-    }
-  };
-
-  const handleSaveBaseResume = async (): Promise<boolean> => {
-    const values = getValues();
-
-    if (!values.rxresumeBaseResumeId) {
-      toast.info("Select a base resume to continue");
-      return false;
-    }
-
-    try {
-      setIsSavingEnv(true);
-      await api.updateSettings({
-        rxresumeMode: values.rxresumeMode,
-        rxresumeBaseResumeId: values.rxresumeBaseResumeId,
-      });
-      const validation = await validateBaseResume();
+      setMasterResumeExists(true);
+      const validation = await validateResume();
       if (!validation.valid) {
-        toast.error(validation.message || "Base resume validation failed");
+        toast.error(validation.message || "Resume validation failed");
         return false;
       }
-
-      await refreshSettings();
-      toast.success("Base resume set");
+      toast.success("Resume saved.");
       return true;
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to save base resume";
-      toast.error(message);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save resume");
       return false;
     } finally {
-      setIsSavingEnv(false);
+      setIsSavingResume(false);
     }
   };
 
@@ -564,22 +364,23 @@ export const OnboardingGate: React.FC = () => {
     isSavingEnv ||
     settingsLoading ||
     isValidatingLlm ||
-    isValidatingRxresume ||
-    isValidatingBaseResume;
+    isValidatingResume ||
+    isSavingResume;
   const canGoBack = stepIndex > 0;
 
   const handlePrimaryAction = async () => {
     if (!currentStep) return;
     if (currentStep === "llm") {
-      await handleSaveLlm();
+      const ok = await handleSaveLlm();
+      if (ok) setCurrentStep("resume");
       return;
     }
-    if (currentStep === "rxresume") {
-      await handleSaveRxresume();
-      return;
-    }
-    if (currentStep === "baseresume") {
-      await handleSaveBaseResume();
+    if (currentStep === "resume") {
+      if (masterResumeExists) {
+        await validateResume();
+      } else {
+        await handleSaveMasterResume();
+      }
       return;
     }
   };
@@ -601,13 +402,13 @@ export const OnboardingGate: React.FC = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Welcome to Job Ops</AlertDialogTitle>
             <AlertDialogDescription>
-              Let's get your workspace ready. Add your keys and resume once,
+              Let's get your workspace ready. Add your LLM key and resume once,
               then the pipeline can run end-to-end.
             </AlertDialogDescription>
           </AlertDialogHeader>
 
           <Tabs value={currentStep} onValueChange={setCurrentStep}>
-            <TabsList className="grid h-auto w-full grid-cols-1 gap-2 border-b border-border/60 bg-transparent p-0 text-left sm:grid-cols-3">
+            <TabsList className="grid h-auto w-full grid-cols-1 gap-2 border-b border-border/60 bg-transparent p-0 text-left sm:grid-cols-2">
               {steps.map((step, index) => {
                 const isActive = step.id === currentStep;
                 const isComplete = step.complete;
@@ -743,70 +544,62 @@ export const OnboardingGate: React.FC = () => {
               </div>
             </TabsContent>
 
-            <TabsContent value="rxresume" className="space-y-4 pt-6">
-              <ReactiveResumeConfigPanel
-                mode={rxresumeModeCurrent}
-                onModeChange={(mode) => {
-                  setValue("rxresumeMode", mode);
-                  setValue(
-                    "rxresumeBaseResumeId",
-                    getBaseResumeIdForMode(mode),
-                  );
-                  setRxresumeValidation((previous) => ({
-                    ...EMPTY_VALIDATION_STATE,
-                    checked: previous.checked,
-                  }));
-                }}
-                disabled={isSavingEnv}
-                showValidationStatus
-                validationStatuses={rxresumeVersionValidations}
-                intro={{
-                  title: "Link your RxResume account",
-                  description:
-                    "Used to export tailored PDFs. Choose between Reactive Resume version 4 and 5, and provide the credentials.",
-                }}
-                v5={{
-                  apiKey: watch("rxresumeApiKey"),
-                  onApiKeyChange: (value) => setValue("rxresumeApiKey", value),
-                }}
-                v4={{
-                  email: watch("rxresumeEmail"),
-                  onEmailChange: (value) => setValue("rxresumeEmail", value),
-                  password: watch("rxresumePassword"),
-                  onPasswordChange: (value) =>
-                    setValue("rxresumePassword", value),
-                }}
-              />
-            </TabsContent>
-
-            <TabsContent value="baseresume" className="space-y-4 pt-6">
+            <TabsContent value="resume" className="space-y-4 pt-6">
               <div>
-                <p className="text-sm font-semibold">
-                  Select your template resume
-                </p>
+                <p className="text-sm font-semibold">Upload your resume</p>
                 <p className="text-xs text-muted-foreground">
-                  Choose the resume you want to use as a template. The selected
-                  resume will be used as a template for tailoring.
+                  Paste your full resume as plain text. The pipeline will use
+                  this to generate tailored resume PDFs and cover letters.
                 </p>
               </div>
-              <Controller
-                name="rxresumeBaseResumeId"
-                control={control}
-                render={({ field }) => (
-                  <BaseResumeSelection
-                    value={field.value}
-                    onValueChange={(value) => {
-                      const mode = (getValues("rxresumeMode") ??
-                        "v5") as RxResumeMode;
-                      setBaseResumeIdForMode(mode, value);
-                      field.onChange(value);
-                    }}
-                    hasRxResumeAccess={rxresumeValidation.valid}
-                    rxresumeMode={rxresumeModeCurrent}
-                    disabled={isSavingEnv}
+
+              {isFetchingResume ? (
+                <p className="text-xs text-muted-foreground">Loading…</p>
+              ) : masterResumeExists ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-green-600 font-medium">
+                      ✓ Resume uploaded ({masterResumeText.length.toLocaleString()} chars)
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setMasterResumeExists(false)}
+                      disabled={isBusy}
+                    >
+                      Replace
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Click Validate to confirm your resume is ready, or Replace to update it.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="onboarding-resume-text" className="text-xs">
+                    Resume text
+                  </Label>
+                  <Textarea
+                    id="onboarding-resume-text"
+                    ref={textareaRef}
+                    value={masterResumeText}
+                    onChange={(e) => setMasterResumeText(e.target.value)}
+                    placeholder="Paste your full resume here (work experience, education, skills, projects…)"
+                    className="min-h-[220px] font-mono text-xs resize-y"
+                    disabled={isSavingResume}
                   />
-                )}
-              />
+                  <p className="text-xs text-muted-foreground">
+                    {masterResumeText.length.toLocaleString()} characters
+                  </p>
+                  <Button
+                    size="sm"
+                    onClick={handleSaveMasterResume}
+                    disabled={isSavingResume || masterResumeText.trim().length < 50}
+                  >
+                    {isSavingResume ? "Saving…" : "Save resume"}
+                  </Button>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
 
@@ -825,8 +618,7 @@ export const OnboardingGate: React.FC = () => {
                   : getStepPrimaryLabel({
                       currentStep,
                       llmValidated,
-                      rxresumeValidated: rxresumeValidation.valid,
-                      baseResumeValidated: baseResumeValidation.valid,
+                      resumeValidated: resumeValidation.valid,
                     })}
               </Button>
             </div>

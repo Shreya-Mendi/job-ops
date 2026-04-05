@@ -50,6 +50,10 @@ interface OrchestratorFiltersProps {
   sort: JobSort;
   onSortChange: (sort: JobSort) => void;
   onResetFilters: () => void;
+  jobTypeFilter: string;
+  onJobTypeFilterChange: (value: string) => void;
+  titleKeyword: string;
+  onTitleKeywordChange: (value: string) => void;
   filteredCount: number;
   isFiltersOpen?: boolean;
   onFiltersOpenChange?: (open: boolean) => void;
@@ -130,6 +134,10 @@ export const OrchestratorFilters: React.FC<OrchestratorFiltersProps> = ({
   filteredCount,
   isFiltersOpen: isFiltersOpenProp,
   onFiltersOpenChange: onFiltersOpenChangeProp,
+  jobTypeFilter,
+  onJobTypeFilterChange,
+  titleKeyword,
+  onTitleKeywordChange,
 }) => {
   const [internalOpen, setInternalOpen] = useState(false);
   const isFiltersOpen = isFiltersOpenProp ?? internalOpen;
@@ -146,8 +154,10 @@ export const OrchestratorFilters: React.FC<OrchestratorFiltersProps> = ({
       Number(
         (typeof salaryFilter.min === "number" && salaryFilter.min > 0) ||
           (typeof salaryFilter.max === "number" && salaryFilter.max > 0),
-      ),
-    [sourceFilter, sponsorFilter, salaryFilter.min, salaryFilter.max],
+      ) +
+      Number(titleKeyword.trim().length > 0) +
+      Number(jobTypeFilter !== "all"),
+    [sourceFilter, sponsorFilter, salaryFilter.min, salaryFilter.max, titleKeyword, jobTypeFilter],
   );
   const showSalaryMin =
     salaryFilter.mode === "at_least" || salaryFilter.mode === "between";
@@ -231,6 +241,38 @@ export const OrchestratorFilters: React.FC<OrchestratorFiltersProps> = ({
                 <Separator className="my-4" />
 
                 <div className="min-h-0 flex-1 space-y-4 overflow-y-auto pr-1">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle>Title / Company</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Input
+                        placeholder='e.g. "intern", "ML engineer"'
+                        value={titleKeyword}
+                        onChange={(e) => onTitleKeywordChange(e.target.value)}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle>Job Type</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex flex-wrap gap-2">
+                      {["all", "Internship", "Co-op", "Full-time", "Part-time", "Contract"].map((type) => (
+                        <Button
+                          key={type}
+                          type="button"
+                          size="sm"
+                          variant={jobTypeFilter === type ? "default" : "outline"}
+                          onClick={() => onJobTypeFilterChange(type)}
+                        >
+                          {type === "all" ? "All types" : type}
+                        </Button>
+                      ))}
+                    </CardContent>
+                  </Card>
+
                   <Card>
                     <CardHeader className="pb-3">
                       <CardTitle>Sources</CardTitle>

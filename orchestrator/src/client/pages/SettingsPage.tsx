@@ -16,6 +16,9 @@ import { DangerZoneSection } from "@client/pages/settings/components/DangerZoneS
 import { DisplaySettingsSection } from "@client/pages/settings/components/DisplaySettingsSection";
 import { EnvironmentSettingsSection } from "@client/pages/settings/components/EnvironmentSettingsSection";
 import { ModelSettingsSection } from "@client/pages/settings/components/ModelSettingsSection";
+import { MasterResumeSection } from "@client/pages/settings/components/MasterResumeSection";
+import { PresetsSection } from "@client/pages/settings/components/PresetsSection";
+import { SourceResumeSection } from "@client/pages/settings/components/SourceResumeSection";
 import { ReactiveResumeSection } from "@client/pages/settings/components/ReactiveResumeSection";
 import { ScoringSettingsSection } from "@client/pages/settings/components/ScoringSettingsSection";
 import { TracerLinksSettingsSection } from "@client/pages/settings/components/TracerLinksSettingsSection";
@@ -955,6 +958,9 @@ export const SettingsPage: React.FC = () => {
             isLoading={isLoading}
             isSaving={isSaving}
           />
+          <MasterResumeSection isLoading={isLoading} />
+          <SourceResumeSection />
+          <PresetsSection />
           <ReactiveResumeSection
             rxResumeBaseResumeIdDraft={rxResumeBaseResumeIdDraft}
             onRxresumeModeChange={(mode) => {

@@ -5,9 +5,9 @@ import {
   normalizeCountryKey,
   SUPPORTED_COUNTRY_KEYS,
 } from "@shared/location-support.js";
-import type { AppSettings, JobSource } from "@shared/types";
-import { Loader2, Sparkles } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type { AppSettings, JobSource, PipelinePreset } from "@shared/types";
+import { Loader2, Sparkles, Tag } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Accordion,
@@ -56,9 +56,9 @@ interface AutomaticRunTabProps {
 const DEFAULT_VALUES: AutomaticRunValues = {
   topN: 10,
   minSuitabilityScore: 50,
-  searchTerms: ["web developer"],
-  runBudget: 200,
-  country: "united kingdom",
+  searchTerms: ["machine learning engineer", "AI engineer", "software engineer machine learning"],
+  runBudget: 500,
+  country: "united states",
   cityLocations: [],
 };
 
@@ -80,6 +80,70 @@ const GLASSDOOR_COUNTRY_REASON =
 const GLASSDOOR_LOCATION_REASON =
   "Add at least one city in Advanced settings to enable Glassdoor.";
 const HIDDEN_COUNTRY_KEYS = new Set(["usa/ca"]);
+
+interface SearchTermPreset {
+  label: string;
+  terms: string[];
+  cityLocations?: string[];
+  country?: string;
+}
+
+const SEARCH_TERM_PRESETS: SearchTermPreset[] = [
+  {
+    label: "Internship – RTP",
+    terms: [
+      "machine learning intern",
+      "AI intern",
+      "software engineer intern",
+      "data science intern",
+    ],
+    cityLocations: ["Raleigh, NC", "Durham, NC", "Chapel Hill, NC"],
+    country: "united states",
+  },
+  {
+    label: "Internship – Remote",
+    terms: [
+      "machine learning intern remote",
+      "AI intern remote",
+      "software engineer intern remote",
+      "data science intern remote",
+    ],
+    country: "united states",
+  },
+  {
+    label: "Co-op – Nationwide",
+    terms: [
+      "machine learning co-op",
+      "AI co-op",
+      "software engineer co-op",
+      "data science co-op",
+    ],
+    country: "united states",
+  },
+  {
+    label: "NYC Finance",
+    terms: [
+      "quantitative analyst",
+      "financial engineer",
+      "data scientist finance",
+      "machine learning quant",
+      "quantitative researcher",
+    ],
+    cityLocations: ["New York, NY"],
+    country: "united states",
+  },
+  {
+    label: "AI/ML Full-time",
+    terms: [
+      "machine learning engineer",
+      "AI engineer",
+      "NLP engineer",
+      "deep learning engineer",
+      "MLOps engineer",
+    ],
+    country: "united states",
+  },
+];
 
 function normalizeUiCountryKey(value: string): string {
   const normalized = normalizeCountryKey(value);
@@ -151,6 +215,9 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
 }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [savedPresets, setSavedPresets] = useState<PipelinePreset[]>([]);
+  const [runningPresetId, setRunningPresetId] = useState<string | null>(null);
+  const presetsLoadedRef = useRef(false);
   const { watch, reset, setValue } = useForm<AutomaticRunFormValues>({
     defaultValues: {
       topN: String(DEFAULT_VALUES.topN),
@@ -223,7 +290,56 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
       searchTermDraft: "",
     });
     setAdvancedOpen(false);
+
+    // Fetch saved presets once when the dialog opens
+    if (!presetsLoadedRef.current) {
+      presetsLoadedRef.current = true;
+      fetch("/api/presets")
+        .then((r) => r.json())
+        .then((json) => {
+          if (Array.isArray(json?.data)) {
+            setSavedPresets(json.data as PipelinePreset[]);
+          }
+        })
+        .catch(() => {
+          // silently ignore
+        });
+    }
   }, [open, settings, reset]);
+
+  const loadPresetIntoForm = (preset: PipelinePreset) => {
+    setValue("country", preset.country, { shouldDirty: true });
+    setValue("cityLocations", preset.cityLocations, { shouldDirty: true });
+    setValue("searchTerms", preset.searchTerms, { shouldDirty: true });
+    setValue("topN", String(preset.topN), { shouldDirty: true });
+    setValue("minSuitabilityScore", String(preset.minSuitabilityScore), {
+      shouldDirty: true,
+    });
+    setValue("runBudget", String(preset.runBudget), { shouldDirty: true });
+    if (preset.sources?.length) {
+      onSetPipelineSources(preset.sources);
+    }
+  };
+
+  const handleRunPreset = async (preset: PipelinePreset) => {
+    setRunningPresetId(preset.id);
+    try {
+      const res = await fetch(`/api/presets/${preset.id}/run`, {
+        method: "POST",
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json?.error || "Failed to start");
+      const { toast } = await import("sonner");
+      toast.success(`Pipeline started with preset "${preset.name}".`);
+    } catch (err) {
+      const { toast } = await import("sonner");
+      toast.error(
+        err instanceof Error ? err.message : "Failed to run preset",
+      );
+    } finally {
+      setRunningPresetId(null);
+    }
+  };
 
   const values = useMemo<AutomaticRunValues>(() => {
     const normalizedCountry = normalizeUiCountryKey(countryInput);
@@ -344,6 +460,49 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
+        {savedPresets.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Saved Presets</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-wrap gap-2 pt-0">
+              {savedPresets.map((preset) => (
+                <div key={preset.id} className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="gap-1.5 text-xs"
+                    onClick={() => loadPresetIntoForm(preset)}
+                    disabled={runningPresetId !== null}
+                  >
+                    {preset.name}
+                    {preset.jobType && (
+                      <span className="text-muted-foreground">
+                        · {preset.jobType}
+                      </span>
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="ghost"
+                    className="h-7 w-7 shrink-0"
+                    title={`Run "${preset.name}" now`}
+                    disabled={isPipelineRunning || runningPresetId !== null}
+                    onClick={() => void handleRunPreset(preset)}
+                  >
+                    {runningPresetId === preset.id ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3 w-3" />
+                    )}
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardContent className="space-y-4 pt-6">
             <div className="grid items-center gap-3 md:grid-cols-[120px_1fr]">
@@ -480,10 +639,38 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
         </Card>
 
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-2">
             <CardTitle>Search terms</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
+            {/* Quick presets */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Tag className="h-3 w-3" />
+                <span>Quick presets</span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {SEARCH_TERM_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => {
+                      setValue("searchTerms", preset.terms, { shouldDirty: true });
+                      if (preset.country) {
+                        setValue("country", preset.country, { shouldDirty: true });
+                      }
+                      if (preset.cityLocations && preset.cityLocations.length > 0) {
+                        setValue("cityLocations", preset.cityLocations, { shouldDirty: true });
+                        setAdvancedOpen(true);
+                      }
+                    }}
+                    className="rounded-full border border-border/60 bg-muted/30 px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <TokenizedInput
               id="search-terms-input"
               values={searchTerms}
@@ -514,6 +701,9 @@ export const AutomaticRunTab: React.FC<AutomaticRunTabProps> = ({
                   source,
                   values.country,
                 );
+                // Hide sources incompatible with selected country (e.g. Gradcracker when US)
+                if (!countryAllowed) return null;
+
                 const allowed = isSourceAvailableForRun(source);
                 const selected = compatiblePipelineSources.includes(source);
                 const disabledReason = getSourceDisabledReason(

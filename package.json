@@ -20,7 +20,8 @@
     "check:docs": "npm --workspace docs-site run build",
     "docs:serve": "npm --workspace docs-site run serve",
     "docs:version": "npm --workspace docs-site run docs:version",
-    "knip": "knip"
+    "knip": "knip",
+    "update-master-resume": "tsx scripts/update-master-resume.ts"
   },
   "devDependencies": {
     "@types/node": "^25.2.3",

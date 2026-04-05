@@ -169,6 +169,14 @@ export const JobHeader: React.FC<JobHeaderProps> = ({
   const isJobPage = pathname.startsWith("/job/");
   const deadline = formatDate(job.deadline);
 
+  const postedDate = useMemo(() => {
+    if (!job.datePosted) return null;
+    const ts = Number(job.datePosted);
+    const d = isNaN(ts) ? new Date(job.datePosted) : new Date(ts);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  }, [job.datePosted]);
+
   return (
     <div className={cn("space-y-3", className)}>
       {/* Detail header: lighter weight than list items */}
@@ -223,10 +231,16 @@ export const JobHeader: React.FC<JobHeaderProps> = ({
             {job.location}
           </span>
         )}
+        {postedDate && (
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            Posted {postedDate}
+          </span>
+        )}
         {deadline && (
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />
-            {deadline}
+            Deadline {deadline}
           </span>
         )}
         {job.salary && (

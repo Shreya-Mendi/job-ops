@@ -25,6 +25,7 @@ export const LLM_PROVIDERS = [
   "ollama",
   "openai",
   "gemini",
+  "anthropic",
 ] as const;
 
 export type LlmProviderId = (typeof LLM_PROVIDERS)[number];
@@ -35,12 +36,14 @@ export const LLM_PROVIDER_LABELS: Record<LlmProviderId, string> = {
   ollama: "Ollama",
   openai: "OpenAI",
   gemini: "Gemini",
+  anthropic: "Anthropic",
 };
 
 const PROVIDERS_WITH_API_KEY = new Set<LlmProviderId>([
   "openrouter",
   "openai",
   "gemini",
+  "anthropic",
 ]);
 
 const PROVIDERS_WITH_BASE_URL = new Set<LlmProviderId>(["lmstudio", "ollama"]);
@@ -52,6 +55,7 @@ const PROVIDER_HINTS: Record<LlmProviderId, string> = {
   ollama: "Ollama typically runs locally and does not require an API key.",
   openai: "OpenAI uses the Responses API with structured outputs.",
   gemini: "Gemini uses the native AI Studio API and requires a key.",
+  anthropic: "Anthropic uses the Claude API and requires an API key.",
 };
 
 const PROVIDER_KEY_HELPERS: Record<LlmProviderId, string> = {
@@ -60,6 +64,7 @@ const PROVIDER_KEY_HELPERS: Record<LlmProviderId, string> = {
   ollama: "No API key required for Ollama",
   openai: "Create a key at platform.openai.com",
   gemini: "Create a key at aistudio.google.com/api-keys",
+  anthropic: "Create a key at console.anthropic.com",
 };
 
 const BASE_URL_PROVIDERS = ["lmstudio", "ollama"] as const;

@@ -68,6 +68,8 @@ export async function getJobListItems(
     discoveredAt: jobs.discoveredAt,
     appliedAt: jobs.appliedAt,
     updatedAt: jobs.updatedAt,
+    pdfPath: jobs.pdfPath,
+    coverLetterPath: jobs.coverLetterPath,
   } as const;
 
   const query =
@@ -456,6 +458,8 @@ function mapRowToJob(row: typeof jobs.$inferSelect): Job {
     tailoredSkills: row.tailoredSkills ?? null,
     selectedProjectIds: row.selectedProjectIds ?? null,
     pdfPath: row.pdfPath,
+    coverLetterPath: row.coverLetterPath ?? null,
+    coverLetterText: row.coverLetterText ?? null,
     tracerLinksEnabled: row.tracerLinksEnabled ?? false,
     sponsorMatchScore: row.sponsorMatchScore ?? null,
     sponsorMatchNames: row.sponsorMatchNames ?? null,
@@ -490,3 +494,4 @@ function mapRowToJob(row: typeof jobs.$inferSelect): Job {
     updatedAt: row.updatedAt,
   };
 }
+

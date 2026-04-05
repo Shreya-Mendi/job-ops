@@ -12,6 +12,8 @@ import { setupSse, startSseHeartbeat, writeSseData } from "@infra/sse";
 import { isDemoMode, sendDemoBlocked } from "@server/config/demo";
 import {
   generateFinalPdf,
+  generateJobCoverLetter,
+  generateJobMaterials,
   processJob,
   summarizeJob,
 } from "@server/pipeline/index";
@@ -387,7 +389,7 @@ async function executeJobActionForJob(
           });
         }
       } else {
-        const processed = await processJob(jobId, {
+        const processed = await generateJobMaterials(jobId, {
           force: options?.forceMoveToReady ?? false,
           requestOrigin: options?.requestOrigin ?? null,
         });
@@ -1359,3 +1361,28 @@ jobsRouter.delete("/score/:threshold", async (req: Request, res: Response) => {
     });
   }
 });
+
+/**
+ * POST /api/jobs/:id/generate-cover-letter - Generate cover letter PDF for a job
+ */
+jobsRouter.post(
+  "/:id/generate-cover-letter",
+  async (req: Request, res: Response) => {
+    try {
+      if (isDemoMode()) {
+        return res
+          .status(403)
+          .json({ success: false, error: "Not available in demo mode" });
+      }
+      const result = await generateJobCoverLetter(req.params.id);
+      if (!result.success) {
+        return res.status(400).json({ success: false, error: result.error });
+      }
+      const job = await jobsRepo.getJobById(req.params.id);
+      res.json({ success: true, data: job });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      res.status(500).json({ success: false, error: message });
+    }
+  },
+);

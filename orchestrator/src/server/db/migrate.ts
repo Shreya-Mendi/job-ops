@@ -603,6 +603,48 @@ const migrations = [
        ORDER BY se.occurred_at DESC, se.id DESC
        LIMIT 1
      ), 'applied') = 'closed'`,
+
+  // Add cover letter columns for local PDF generation (safe to skip if already present)
+  `ALTER TABLE jobs ADD COLUMN cover_letter_path TEXT`,
+  `ALTER TABLE jobs ADD COLUMN cover_letter_text TEXT`,
+
+  // Pipeline presets for saved search configurations with optional scheduling
+  `CREATE TABLE IF NOT EXISTS pipeline_presets (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    search_terms TEXT NOT NULL DEFAULT '[]',
+    country TEXT NOT NULL DEFAULT 'united states',
+    city_locations TEXT NOT NULL DEFAULT '[]',
+    top_n INTEGER NOT NULL DEFAULT 10,
+    min_suitability_score INTEGER NOT NULL DEFAULT 50,
+    run_budget INTEGER NOT NULL DEFAULT 500,
+    job_type TEXT,
+    sources TEXT NOT NULL DEFAULT '["indeed","linkedin","glassdoor","jobright"]',
+    schedule_enabled INTEGER NOT NULL DEFAULT 0,
+    schedule_hours TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
+
+  // Add sources column to existing pipeline_presets tables (safe to skip if already present)
+  `ALTER TABLE pipeline_presets ADD COLUMN sources TEXT NOT NULL DEFAULT '["indeed","linkedin","glassdoor","jobright"]'`,
+
+  // (legacy) old CREATE TABLE without sources — replaced above
+  `CREATE TABLE IF NOT EXISTS pipeline_presets (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    search_terms TEXT NOT NULL DEFAULT '[]',
+    country TEXT NOT NULL DEFAULT 'united states',
+    city_locations TEXT NOT NULL DEFAULT '[]',
+    top_n INTEGER NOT NULL DEFAULT 10,
+    min_suitability_score INTEGER NOT NULL DEFAULT 50,
+    run_budget INTEGER NOT NULL DEFAULT 500,
+    job_type TEXT,
+    schedule_enabled INTEGER NOT NULL DEFAULT 0,
+    schedule_hours TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`,
 ];
 
 console.log("🔧 Running database migrations...");
@@ -621,7 +663,10 @@ for (const migration of migrations) {
           .includes("alter table post_application_messages add column") ||
         migration
           .toLowerCase()
-          .includes("alter table stage_events add column")) &&
+          .includes("alter table stage_events add column") ||
+        migration
+          .toLowerCase()
+          .includes("alter table pipeline_presets add column")) &&
       message.toLowerCase().includes("duplicate column name");
 
     if (isDuplicateColumn) {

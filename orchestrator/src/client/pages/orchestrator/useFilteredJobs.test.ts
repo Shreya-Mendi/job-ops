@@ -34,6 +34,7 @@ describe("useFilteredJobs", () => {
           key: "score",
           direction: "desc",
         },
+        "",
       ),
     );
 
@@ -59,6 +60,7 @@ describe("useFilteredJobs", () => {
           key: "score",
           direction: "desc",
         },
+        "",
       ),
     );
 
@@ -87,6 +89,7 @@ describe("useFilteredJobs", () => {
           key: "salary",
           direction: "desc",
         },
+        "",
       ),
     );
 

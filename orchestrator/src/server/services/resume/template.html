@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    font-size: 9.5pt;
+    color: #222;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 20px 30px;
+    line-height: 1.35;
+  }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 10px; border-bottom: 2px solid #333; padding-bottom: 8px; }
+  .header h1 { font-size: 18pt; font-weight: bold; letter-spacing: 0.05em; text-transform: uppercase; }
+  .header .contact {
+    font-size: 8.5pt;
+    color: #444;
+    margin-top: 3px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0 10px;
+  }
+  .header .contact a { color: #444; text-decoration: none; }
+
+  /* Section headings */
+  h2 {
+    font-size: 9.5pt;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid #888;
+    margin: 10px 0 5px;
+    padding-bottom: 1px;
+  }
+
+  /* Summary */
+  .summary p { font-size: 9pt; line-height: 1.45; }
+
+  /* Experience / Projects entries */
+  .entry { margin-bottom: 7px; }
+  .entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .entry-org { font-weight: bold; font-size: 9.5pt; }
+  .entry-role { font-style: italic; font-size: 9pt; color: #333; }
+  .entry-date { font-size: 8.5pt; color: #555; white-space: nowrap; margin-left: 8px; }
+  .entry-loc { font-size: 8.5pt; color: #666; }
+  ul { margin: 2px 0 0 14px; }
+  li { font-size: 9pt; line-height: 1.4; margin-bottom: 1px; }
+
+  /* Skills */
+  .skills-table { width: 100%; border-collapse: collapse; }
+  .skills-table td { font-size: 9pt; vertical-align: top; padding: 1px 0; }
+  .skills-table td:first-child { font-weight: bold; width: 22%; white-space: nowrap; padding-right: 6px; }
+
+  /* Education */
+  .edu-entry { margin-bottom: 5px; }
+
+  /* Two-column layout for projects */
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 16px;
+  }
+
+  /* Volunteering inline */
+  .vol-entry { font-size: 8.5pt; color: #444; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>{{NAME}}</h1>
+  <div class="contact">
+    <span>{{EMAIL}}</span>
+    <span>{{PHONE}}</span>
+    <span>{{LOCATION}}</span>
+    {{PROFILE_LINKS}}
+  </div>
+</div>
+
+<h2>Summary</h2>
+<div class="summary"><p>{{SUMMARY}}</p></div>
+
+<h2>Skills</h2>
+<table class="skills-table">
+{{SKILLS}}
+</table>
+
+<h2>Experience</h2>
+{{EXPERIENCE}}
+
+<h2>Projects</h2>
+<div class="projects-grid">
+{{PROJECTS}}
+</div>
+
+<h2>Education</h2>
+{{EDUCATION}}
+
+{{VOLUNTEERING}}
+
+</body>
+</html>

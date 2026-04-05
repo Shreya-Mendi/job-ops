@@ -348,6 +348,10 @@ export const JobDetailPanel: React.FC<JobDetailPanelProps> = ({
   );
 
   const selectedHasPdf = !!selectedJob?.pdfPath;
+  const selectedHasCoverLetter = !!selectedJob?.coverLetterPath;
+  const selectedCoverLetterHref = selectedJob
+    ? `/pdfs/cover_letter_${selectedJob.id}.pdf?v=${encodeURIComponent(selectedJob.updatedAt)}`
+    : "#";
   const selectedJobLink = selectedJob
     ? selectedJob.applicationLink || selectedJob.jobUrl
     : "#";
@@ -469,6 +473,23 @@ export const JobDetailPanel: React.FC<JobDetailPanelProps> = ({
             </Button>
           ))}
 
+        {showReadyPdf && selectedHasCoverLetter && (
+          <Button
+            asChild
+            size="sm"
+            variant="ghost"
+            className="h-8 gap-1.5 text-xs"
+          >
+            <a
+              href={selectedCoverLetterHref}
+              download={`${safeFilenamePart(personName || "Unknown")}_${safeFilenamePart(selectedJob?.employer || "Unknown")}_CoverLetter.pdf`}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              Save CL
+            </a>
+          </Button>
+        )}
+
         {showGeneratePdf && (
           <Button
             size="sm"
@@ -565,7 +586,30 @@ export const JobDetailPanel: React.FC<JobDetailPanelProps> = ({
                     download={`${safeFilenamePart(personName || "Unknown")}_${safeFilenamePart(selectedJob.employer || "Unknown")}.pdf`}
                   >
                     <FileText className="mr-2 h-4 w-4" />
-                    Download PDF
+                    Download Resume PDF
+                  </a>
+                </DropdownMenuItem>
+              </>
+            )}
+            {selectedHasCoverLetter && (
+              <>
+                <DropdownMenuItem asChild>
+                  <a
+                    href={selectedCoverLetterHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    View Cover Letter
+                  </a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a
+                    href={selectedCoverLetterHref}
+                    download={`${safeFilenamePart(personName || "Unknown")}_${safeFilenamePart(selectedJob.employer || "Unknown")}_CoverLetter.pdf`}
+                  >
+                    <FileText className="mr-2 h-4 w-4" />
+                    Download Cover Letter
                   </a>
                 </DropdownMenuItem>
               </>
